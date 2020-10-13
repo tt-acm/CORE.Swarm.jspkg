@@ -74,17 +74,14 @@ class SwarmApp {
     axios
       .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
       .then((res) => {
-        console.log(`statusCode: ${res.statusCode}`);
+        // console.log(`statusCode: ${res.statusCode}`);
         console.log(res.data.values);
+        console.log(Object.values(res.data.values.InnerTree));
         return res;
       })
       .catch((error) => {
         console.error(error)
       })
-  }
-
-  getDoc() {
-    return this.document;
   }
 
   addInput(input) {
@@ -97,7 +94,6 @@ class SwarmApp {
 
 
     const typecode = Object.keys(typeDict)[Object.values(typeDict).indexOf(input.type)];
-    console.log("typecode", typecode);
     const paramName = "SWRM_IN:" + typecode + ":" + input.name;
     newInput.ParamName = paramName;
 
@@ -162,8 +158,6 @@ class SwarmApp {
     });
 
     this.values.push(newInput);
-
-    console.log("this.values", this.values);
 
 
     // this.platform = {
