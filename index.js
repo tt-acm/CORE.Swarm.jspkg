@@ -65,7 +65,7 @@ class SwarmCompute {
     const paramName = "SWRM_IN:" + typeNum + input.name;
     newInput.ParamName = paramName;
 
-    input.values.forEach(in => {
+    input.values.forEach(function(in) {
       var tree = [];
       var swarmObj = {};
       //console.log(input.Typecode);
