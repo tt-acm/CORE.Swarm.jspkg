@@ -52,7 +52,12 @@ class SwarmCompute {
   }
 
   addInput(input) {
-    const typeNum = Object.keys[Object.values(typeDict).indexOf(input.type)];
+    const allValues = Object.values(typeDict);
+    console.log("allValues", allValues);
+    console.log("input.type", input.type);
+
+
+    const typeNum = Object.keys(typeDict)[Object.values(typeDict).indexOf(input.type)];
     console.log("typeNum", typeNum);
     // this.platform = {
     //         "ParamName": "SWRM_IN:105:A",
