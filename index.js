@@ -61,7 +61,7 @@ class SwarmCompute {
 
 
     const typecode = Object.keys(typeDict)[Object.values(typeDict).indexOf(input.type)];
-    console.log("typeNum", typeNum);
+    console.log("typecode", typecode);
     const paramName = "SWRM_IN:" + typecode + input.name;
     newInput.ParamName = paramName;
 
