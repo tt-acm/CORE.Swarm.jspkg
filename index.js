@@ -76,7 +76,7 @@ class SwarmApp {
       .then((res) => {
         // console.log(`statusCode: ${res.statusCode}`);
         console.log(res.data.values);
-        console.log(Object.values(res.data.values.InnerTree));
+        console.log(res.data.values.InnerTree['{ 0; }']);
         return res;
       })
       .catch((error) => {
