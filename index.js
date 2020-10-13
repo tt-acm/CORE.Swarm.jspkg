@@ -1,3 +1,9 @@
-exports.printMsg = function() {
-  console.log("This is a message from the demo package");
+class SwarmCompute {
+  constructor(units, tolerance) {
+    this.units = units;
+    this.tolerance = tolerance;
+  }
 }
+
+
+export { SwarmCompute as default };
