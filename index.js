@@ -41,6 +41,8 @@ const typeDict = {
 class SwarmApp {
   constructor(units, tolerance) {
     this.document = null;
+    this.values = [];
+    this.appToken = null;
   }
 
   // Method
@@ -49,6 +51,10 @@ class SwarmApp {
       tolerance: tolerance,
       units: units
     };
+  }
+
+  setToken(token) {
+    this.appToken = token;
   }
   //
   // setProject(proj) {
@@ -61,51 +67,24 @@ class SwarmApp {
 
   callIntoSwarm() {
     const reqBody = {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MDIxMjY3NDI3MTMsInByb2plY3RJZCI6IjVmN2U4MDg0NzQ4MWU0MDAwNDg5YWFlZiJ9.Zmhz1R1arizYuF_RGuwRcQyLb9jPjYx3zRF4BDGVygo",
-      "inputs": [{
-          "ParamName": "SWRM_IN:105:A",
-          "InnerTree": {
-            "{ 0; }": [{
-              "type": "System.Double",
-              "data": 5
-            }]
-          },
-          "Keys": ["{ 0; }"],
-          "Values": [{
-            "type": "System.Double",
-            "data": 5
-          }],
-          "Count": 1,
-          "IsReadOnly": false
-        },
-        {
-          "ParamName": "SWRM_IN:105:B",
-          "InnerTree": {
-            "{ 0; }": [{
-              "type": "System.Double",
-              "data": 7
-            }]
-          },
-          "Keys": ["{ 0; }"],
-          "Values": [{
-            "type": "System.Double",
-            "data": 7
-          }],
-          "Count": 1,
-          "IsReadOnly": false
-        }
-      ]
+      token: this.appToken,
+      inputs: this.values
     }
 
     axios
       .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
       .then((res) => {
         console.log(`statusCode: ${res.statusCode}`);
-        console.log(res);
+        console.log(res.data.values);
+        return res;
       })
       .catch((error) => {
         console.error(error)
       })
+  }
+
+  getDoc() {
+    return this.document;
   }
 
   addInput(input) {
