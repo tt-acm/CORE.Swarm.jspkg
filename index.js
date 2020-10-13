@@ -1,3 +1,18 @@
+const express = require('express');
+const axios = require('axios');
+const app = express();
+const port = process.env.PORT || 5000;
+
+// console.log that your server is up and running
+app.listen(port, () => console.log(`Listening on port ${port}`));
+
+// create a GET route
+app.get('/express_backend', (req, res) => {
+  res.send({
+    express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT'
+  });
+});
+
 const typeDict = {
   101: "Boolean",
   102: "Point",
@@ -23,32 +38,74 @@ const typeDict = {
 }
 
 
-class SwarmCompute {
+class SwarmApp {
   constructor(units, tolerance) {
     this.document = null;
-    // this.definition = null;
-    // this.pointer = def.awsPointer;
-    this.platform = "API";
-    this.project = null;
-    this.supplemental = [];
-    this.values = [];
-    this.version = 6;
   }
 
   // Method
   setDocument(units, tolerance) {
     this.document = {
-      tolerance: 0.01,
-      units: 8
+      tolerance: tolerance,
+      units: units
     };
   }
+  //
+  // setProject(proj) {
+  //   this.project = proj;
+  // }
+  //
+  // setPlatform(p) {
+  //   this.platform = p;
+  // }
 
-  setProject(proj) {
-    this.project = proj;
-  }
+  callIntoSwarm() {
+    const reqBody = {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MDIxMjY3NDI3MTMsInByb2plY3RJZCI6IjVmN2U4MDg0NzQ4MWU0MDAwNDg5YWFlZiJ9.Zmhz1R1arizYuF_RGuwRcQyLb9jPjYx3zRF4BDGVygo",
+      "inputs": [{
+          "ParamName": "SWRM_IN:105:A",
+          "InnerTree": {
+            "{ 0; }": [{
+              "type": "System.Double",
+              "data": 5
+            }]
+          },
+          "Keys": ["{ 0; }"],
+          "Values": [{
+            "type": "System.Double",
+            "data": 5
+          }],
+          "Count": 1,
+          "IsReadOnly": false
+        },
+        {
+          "ParamName": "SWRM_IN:105:B",
+          "InnerTree": {
+            "{ 0; }": [{
+              "type": "System.Double",
+              "data": 7
+            }]
+          },
+          "Keys": ["{ 0; }"],
+          "Values": [{
+            "type": "System.Double",
+            "data": 7
+          }],
+          "Count": 1,
+          "IsReadOnly": false
+        }
+      ]
+    }
 
-  setPlatform(p) {
-    this.platform = p;
+    axios
+      .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
+      .then((res) => {
+        console.log(`statusCode: ${res.statusCode}`);
+        console.log(res);
+      })
+      .catch((error) => {
+        console.error(error)
+      })
   }
 
   addInput(input) {
@@ -62,7 +119,7 @@ class SwarmCompute {
 
     const typecode = Object.keys(typeDict)[Object.values(typeDict).indexOf(input.type)];
     console.log("typecode", typecode);
-    const paramName = "SWRM_IN:" + typecode + input.name;
+    const paramName = "SWRM_IN:" + typecode + ":" + input.name;
     newInput.ParamName = paramName;
 
     input.values.forEach(function(inp) {
@@ -161,4 +218,4 @@ class SwarmCompute {
 // }
 
 
-module.exports = SwarmCompute;
+module.exports = SwarmApp;
