@@ -93,7 +93,7 @@ class SwarmCompute {
         tree.push(swarmObj);
       } else if (typecode == 203) { // Value List
         swarmObj.type = "System.String";
-        var selected = inp.Values.find(v => v.Key == in.Key);
+        var selected = inp.Values.find(v => v.Key == inp.Key);
         swarmObj.data = JSON.stringify(selected.Value);
         tree.push(swarmObj);
       } else if (typecode == 306) {
