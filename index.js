@@ -60,55 +60,55 @@ class SwarmCompute {
     // newInput.InnerTree["{ 0; }"] = [];
 
 
-    const typeNum = Object.keys(typeDict)[Object.values(typeDict).indexOf(input.type)];
+    const typecode = Object.keys(typeDict)[Object.values(typeDict).indexOf(input.type)];
     console.log("typeNum", typeNum);
-    const paramName = "SWRM_IN:" + typeNum + input.name;
+    const paramName = "SWRM_IN:" + typecode + input.name;
     newInput.ParamName = paramName;
 
-    input.values.forEach(function(in) {
+    input.values.forEach(function(inp) {
       var tree = [];
       var swarmObj = {};
       //console.log(input.Typecode);
       // toSwarmTree
-      if (in.Typecode == 106 || in.Typecode == 301 || in.Typecode == 302) { // Text
+      if (typecode == 106 || typecode == 301 || typecode == 302) { // Text
         swarmObj.type = "System.String";
-        swarmObj.data = `\"` + in.Text + `\"`;
+        swarmObj.data = `\"` + inp.Text + `\"`;
         tree.push(swarmObj);
-      } else if (in.Typecode == 105 || in.Typecode == 201) { // Number and Slider
+      } else if (typecode == 105 || typecode == 201) { // Number and Slider
         swarmObj.type = "System.Double";
-        swarmObj.data = in.Value;
+        swarmObj.data = inp.Value;
         tree.push(swarmObj);
-      } else if (in.Typecode == 104) { // Integer
+      } else if (typecode == 104) { // Integer
         swarmObj.type = "System.Int32";
-        swarmObj.data = in.Value;
+        swarmObj.data = inp.Value;
         tree.push(swarmObj);
-      } else if (in.Typecode == 101 || in.Typecode == 202) { // Boolean or Boolean Toogle
+      } else if (typecode == 101 || typecode == 202) { // Boolean or Boolean Toogle
         swarmObj.type = "System.Boolean";
         //console.log("in.State", in.State);
-        swarmObj.data = `\"` + in.State + `\"`;
+        swarmObj.data = `\"` + inp.State + `\"`;
         tree.push(swarmObj);
-      } else if (in.Typecode == 116) { // Time
+      } else if (typecode == 116) { // Time
         swarmObj.type = "System.DateTime";
-        swarmObj.data = `\"` + in.SelectedDateTime + `\"`;
+        swarmObj.data = `\"` + inp.SelectedDateTime + `\"`;
         tree.push(swarmObj);
-      } else if (in.Typecode == 203) { // Value List
+      } else if (typecode == 203) { // Value List
         swarmObj.type = "System.String";
-        var selected = in.Values.find(v => v.Key == in.Key);
+        var selected = inp.Values.find(v => v.Key == in.Key);
         swarmObj.data = JSON.stringify(selected.Value);
         tree.push(swarmObj);
-      } else if (in.Typecode == 306) {
-        console.log("TODO not sure how swarm object ", in);
+      } else if (typecode == 306) {
+        console.log("TODO not sure how swarm object ", inp);
         swarmObj.type = "System.Object";
-        swarmObj.data = JSON.stringify(in.Lines);
+        swarmObj.data = JSON.stringify(inp.Lines);
         tree.push(swarmObj);
-      } else if (in.hasOwnProperty('ReferencedGeometry')) {
-        if (in.ReferencedGeometry != undefined && in.ReferencedGeometry.length > 0) {
-          in.ReferencedGeometry.forEach(element => {
+      } else if (input.hasOwnProperty('ReferencedGeometry')) {
+        if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
+          input.ReferencedGeometry.forEach(element => {
             tree.push(element);
           });
         }
       } else {
-        console.log("TODO new type ? ", in.type);
+        console.log("TODO new type ? ", input.type);
       }
 
       tree.attributes = {
