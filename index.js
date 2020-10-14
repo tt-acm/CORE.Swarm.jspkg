@@ -91,7 +91,7 @@ class SwarmApp {
     };
 
 
-    const typecode = findTypeCodeWithName(input.type);
+    const typecode = this.findTypeCodeWithName(input.type);
     const paramName = "SWRM_IN:" + typecode + ":" + input.name;
     newInput.ParamName = paramName;
 
