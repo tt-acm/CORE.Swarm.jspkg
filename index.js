@@ -177,10 +177,12 @@ class Input {
 
   toObject() {
     return {
-      name: this.name,
+      ParamName: this.name,
       Keys: this.Keys,
       InnerTree: this.InnerTree,
-      Values: this.Values
+      Values: this.Values,
+      Count: this.Values.length,
+      IsReadOnly: false
     }
   }
 }
