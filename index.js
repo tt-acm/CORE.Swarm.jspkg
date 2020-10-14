@@ -201,6 +201,7 @@ class Output {
     if (this.name.split(':').length < 2) return;
     let typecode = this.name.split(':')[1];
 
+    console.log("typecode", typecode);
     if (typecode == 106) // text
     {
       //output.Text = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
@@ -232,7 +233,7 @@ class Output {
       this.outputValue = JSON.parse(valueArray[0].data);
       //output.Url = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
     } else if (output.hasOwnProperty('ReferencedGeometry')) {
-      output.ReferencedGeometry = valueArray;
+      this.outputValue = valueArray;
       //output.ReferencedGeometry = swarmOutput.InnerTree['{ 0; }'];
     }
   }
