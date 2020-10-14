@@ -199,7 +199,7 @@ class Output {
     // var valueArray = Object.values(swarmOutput.InnerTree)[0];
     console.log("output name", this.name);
     if (this.name.split(':').length < 2) return;
-    let typeCode = this.name.split(':')[1];
+    let typecode = this.name.split(':')[1];
 
     if (typecode == 106) // text
     {
