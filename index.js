@@ -57,7 +57,7 @@ class SwarmApp {
       setTimeout(() => {
         const reqBody = {
           token: this.appToken,
-          inputs: this.inputValues
+          inputs: this.inputValues.map(v=>v.toObject());
         }
 
         // var jsonString = JSON.stringify(this.inputValues);
@@ -163,7 +163,7 @@ class SwarmApp {
       newInput.Values = tree;
     });
 
-    this.inputValues.push(newInput.toObject());
+    this.inputValues.push(newInput);
   }
 }
 
