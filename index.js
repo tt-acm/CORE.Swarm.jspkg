@@ -56,12 +56,12 @@ class SwarmApp {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const reqBody = {
-          token: this.appToken
-          // inputs: this.inputValues
+          token: this.appToken,
+          inputs: this.inputValues
         }
 
-        var jsonString = JSON.stringify(this.inputValues);
-        reqBody.inputs = JSON.parse(jsonString);
+        // var jsonString = JSON.stringify(this.inputValues);
+        // reqBody.inputs = JSON.parse(jsonString);
 
         console.log("this.inputValues", this.inputValues);
 
@@ -163,7 +163,7 @@ class SwarmApp {
       newInput.Values = tree;
     });
 
-    this.inputValues.push(newInput);
+    this.inputValues.push(toObject(newInput));
   }
 }
 
@@ -186,6 +186,15 @@ class Output {
   setOutputValue(value) {
     this.value = value;
   }
+}
+
+function toObject(classObj) {
+  const originalClass = classObj || {};
+  const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(originalClass));
+  return keys.reduce((classAsObj, key) => {
+    classAsObj[key] = originalClass[key];
+    return classAsObj;
+  }, {});
 }
 
 
