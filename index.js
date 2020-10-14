@@ -78,7 +78,8 @@ class SwarmApp {
               outputList.push(currentOutput);
             });
             console.log("outputList", outputList);
-            resolve(res.data.values[0].InnerTree['{ 0; }']);
+            // resolve(res.data.values[0].InnerTree['{ 0; }']);
+            resolve(outputList);
           })
           .catch((error) => {
             console.error(error);
@@ -212,23 +213,23 @@ class Output {
         return JSON.parse(val.data);
       });
 
-      output.Text = concat.join(",");
+      this.outputValue = concat.join(",");
     } else if (typecode == 104 || typecode == 105 || typecode == 201) // integer and Number || Slider
     {
       this.outputValue = JSON.parse(valueArray[0].data);
       //output.Value = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data)
     }
-    if (typecode == 101 || typecode == 202) // boolean || boolean Togle
+    else if (typecode == 101 || typecode == 202) // boolean || boolean Togle
     {
       this.outputValue = JSON.parse(valueArray[0].data);
       //output.State = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data == "true");
     }
-    if (typecode == 116) // time
+    else if (typecode == 116) // time
     {
       this.outputValue = JSON.parse(valueArray[0].data);
       //output.SelectedDateTime = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
     }
-    if (typecode == 305) // url
+    else if (typecode == 305) // url
     {
       this.outputValue = JSON.parse(valueArray[0].data);
       //output.Url = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
@@ -236,6 +237,8 @@ class Output {
     //   this.outputValue = valueArray;
       //output.ReferencedGeometry = swarmOutput.InnerTree['{ 0; }'];
     }
+
+    this.attribute = valueArray[0].attributes;
   }
 }
 
