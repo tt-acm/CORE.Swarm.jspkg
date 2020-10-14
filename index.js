@@ -163,7 +163,7 @@ class SwarmApp {
       newInput.Values = tree;
     });
 
-    this.inputValues.push(toObject(newInput));
+    this.inputValues.push(newInput.toObject());
   }
 }
 
@@ -173,6 +173,15 @@ class Input {
     this.Keys = ["{ 0; }"];
     this.InnerTree = {};
     this.Values = null;
+  }
+
+  toObject() {
+    return {
+      name: this.name,
+      Keys: this.Keys,
+      InnerTree: this.InnerTree,
+      Values: this.Values
+    }
   }
 }
 
@@ -188,17 +197,6 @@ class Output {
   }
 }
 
-function toObject(classObj) {
-  const originalClass = classObj || {};
-  console.log("Object.getPrototypeOf(originalClass)", Object.getPrototypeOf(originalClass));
-  console.log("Object.getOwnPropertyNames(Object.getPrototypeOf(originalClass))", Object.getOwnPropertyNames(Object.getPrototypeOf(originalClass)));
-  const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(originalClass));
-  console.log("keys", keys);
-  return keys.reduce((classAsObj, key) => {
-    classAsObj[key] = originalClass[key];
-    return classAsObj;
-  }, {});
-}
 
 
 module.exports = SwarmApp;
