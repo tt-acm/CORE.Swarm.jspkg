@@ -57,7 +57,7 @@ class SwarmApp {
       setTimeout(() => {
         const reqBody = {
           token: this.appToken,
-          inputs: this.inputValues.map(v=>v.toObject())
+          inputs: this.inputValues.map(v => v.toObject())
         }
 
         // var jsonString = JSON.stringify(this.inputValues);
@@ -75,8 +75,9 @@ class SwarmApp {
             res.data.values.forEach(function(val) {
               let currentOutput = new Output(val);
               currentOutput.setOutputValue(val.InnerTree['{ 0; }'])
-              outputList.push();
+              outputList.push(currentOutput);
             });
+            console.log("outputList", outputList);
             resolve(res.data.values[0].InnerTree['{ 0; }']);
           })
           .catch((error) => {
@@ -113,9 +114,9 @@ class SwarmApp {
         swarmObj.data = `\"` + inp.Text + `\"`;
         tree.push(swarmObj);
       } else if (typecode == 105 || typecode == 201) { // Number and Slider
-          swarmObj.type = "System.Double";
-          swarmObj.data = inp.Value;
-          tree.push(swarmObj);
+        swarmObj.type = "System.Double";
+        swarmObj.data = inp.Value;
+        tree.push(swarmObj);
       } else if (typecode == 104) { // Integer
         swarmObj.type = "System.Int32";
         swarmObj.data = inp.Value;
@@ -191,11 +192,49 @@ class Output {
   constructor(output) {
     this.name = output.ParamName;
     this.attribute = output.InnerTree['{ 0; }'].attributes;
-    this.value = null
+    this.outputValue = null
   }
 
-  setOutputValue(value) {
-    this.value = value;
+  setOutputValue(valueArray) {
+    // var valueArray = Object.values(swarmOutput.InnerTree)[0];
+    console.log("output name", this.name);
+    if (this.name.split(':').length < 2) return;
+    let typeCode = this.name.split(':')[1];
+
+    if (typecode == 106) // text
+    {
+      //output.Text = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
+      this.outputValue = JSON.parse(valueArray[0].data);
+    } else if (typecode == 301 || typecode == 302) // multiline panel
+    {
+      var concat = valueArray.map(val => {
+        return JSON.parse(val.data);
+      });
+
+      output.Text = concat.join(",");
+    } else if (typecode == 104 || typecode == 105 || typecode == 201) // integer and Number || Slider
+    {
+      this.outputValue = JSON.parse(valueArray[0].data);
+      //output.Value = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data)
+    }
+    if (typecode == 101 || typecode == 202) // boolean || boolean Togle
+    {
+      this.outputValue = JSON.parse(valueArray[0].data);
+      //output.State = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data == "true");
+    }
+    if (typecode == 116) // time
+    {
+      this.outputValue = JSON.parse(valueArray[0].data);
+      //output.SelectedDateTime = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
+    }
+    if (typecode == 305) // url
+    {
+      this.outputValue = JSON.parse(valueArray[0].data);
+      //output.Url = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
+    } else if (output.hasOwnProperty('ReferencedGeometry')) {
+      output.ReferencedGeometry = valueArray;
+      //output.ReferencedGeometry = swarmOutput.InnerTree['{ 0; }'];
+    }
   }
 }
 
