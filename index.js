@@ -190,7 +190,10 @@ class Output {
 
 function toObject(classObj) {
   const originalClass = classObj || {};
+  console.log("Object.getPrototypeOf(originalClass)", Object.getPrototypeOf(originalClass));
+  console.log("Object.getOwnPropertyNames(Object.getPrototypeOf(originalClass))", Object.getOwnPropertyNames(Object.getPrototypeOf(originalClass)));
   const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(originalClass));
+  console.log("keys", keys);
   return keys.reduce((classAsObj, key) => {
     classAsObj[key] = originalClass[key];
     return classAsObj;
