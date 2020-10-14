@@ -53,22 +53,30 @@ class SwarmApp {
   // }
 
   callIntoSwarm() {
-    const reqBody = {
-      token: this.appToken,
-      inputs: this.values
-    }
 
-    axios
-      .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
-      .then((res) => {
-        // console.log(`statusCode: ${res.statusCode}`);
-        console.log(res.data.values);
-        console.log(res.data.values[0].InnerTree['{ 0; }']);
-        return res;
-      })
-      .catch((error) => {
-        console.error(error)
-      })
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const reqBody = {
+          token: this.appToken,
+          inputs: this.values
+        }
+
+        axios
+          .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
+          .then((res) => {
+            // console.log(`statusCode: ${res.statusCode}`);
+            console.log(res.data.values);
+            console.log(res.data.values[0].InnerTree['{ 0; }']);
+            resolve(res.data.values[0].InnerTree['{ 0; }']);
+          })
+          .catch((error) => {
+            console.error(error);
+            reject(`Error in callback ${error}`);
+          })
+        // resolve(this);
+      }, 5000);
+    });
+
   }
 
   addInput(input) {
