@@ -57,7 +57,7 @@ class SwarmApp {
       setTimeout(() => {
         const reqBody = {
           token: this.appToken,
-          inputs: this.inputValues.map(v=>v.toObject());
+          inputs: this.inputValues.map(v=>v.toObject())
         }
 
         // var jsonString = JSON.stringify(this.inputValues);
