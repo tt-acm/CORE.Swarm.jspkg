@@ -56,9 +56,12 @@ class SwarmApp {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const reqBody = {
-          token: this.appToken,
-          inputs: this.inputValues
+          token: this.appToken
+          // inputs: this.inputValues
         }
+
+        var jsonString = JSON.stringify(this.inputValues);
+        reqBody.inputs = JSON.parse(jsonString);
 
         console.log("this.inputValues", this.inputValues);
 
@@ -181,7 +184,7 @@ class Output {
   }
 
   setOutputValue(value) {
-    this.value = token;
+    this.value = value;
   }
 }
 
