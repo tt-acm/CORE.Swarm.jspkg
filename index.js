@@ -65,8 +65,7 @@ class SwarmApp {
           .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
           .then((res) => {
             // console.log(`statusCode: ${res.statusCode}`);
-            console.log(res.data.values);
-            console.log(res.data.values[0].InnerTree['{ 0; }']);
+            console.log("res.data.values", res.data.values);
             resolve(res.data.values[0].InnerTree['{ 0; }']);
           })
           .catch((error) => {
@@ -79,23 +78,26 @@ class SwarmApp {
 
   }
 
+  findTypeCodeWithName(typeName) {
+    const typeIndex = Object.values(typeDict).indexOf(typeName);
+    if (typeIndex > -1) return Object.keys(typeDict)[typeIndex];
+    else return null;
+  }
+
   addInput(input) {
     const newInput = {
       Keys: ["{ 0; }"],
       InnerTree: {}
     };
 
-    // newInput.InnerTree["{ 0; }"] = [];
 
-
-    const typecode = Object.keys(typeDict)[Object.values(typeDict).indexOf(input.type)];
+    const typecode = findTypeCodeWithName(input.type);
     const paramName = "SWRM_IN:" + typecode + ":" + input.name;
     newInput.ParamName = paramName;
 
     input.values.forEach(function(inp) {
       var tree = [];
       var swarmObj = {};
-      //console.log(input.Typecode);
       // toSwarmTree
       if (typecode == 106 || typecode == 301 || typecode == 302) { // Text
         swarmObj.type = "System.String";
