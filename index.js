@@ -28,7 +28,7 @@ const typeDict = {
 class SwarmApp {
   constructor(units, tolerance) {
     this.document = null;
-    this.values = [];
+    this.inputValues = [];
     this.appToken = null;
   }
 
@@ -40,10 +40,9 @@ class SwarmApp {
     };
   }
 
-  setToken(token) {
-    this.appToken = token;
-  }
-  //
+  // setToken(token) {
+  //   this.appToken = token;
+  // }
   // setProject(proj) {
   //   this.project = proj;
   // }
@@ -58,14 +57,23 @@ class SwarmApp {
       setTimeout(() => {
         const reqBody = {
           token: this.appToken,
-          inputs: this.values
+          inputs: this.inputValues
         }
+
+        console.log("this.inputValues", this.inputValues);
 
         axios
           .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
           .then((res) => {
             // console.log(`statusCode: ${res.statusCode}`);
             console.log("res.data.values", res.data.values);
+            let outputList = [];
+
+            res.data.values.forEach(function(val) {
+              let currentOutput = new Output(val);
+              currentOutput.setOutputValue(val.InnerTree['{ 0; }'])
+              outputList.push();
+            });
             resolve(res.data.values[0].InnerTree['{ 0; }']);
           })
           .catch((error) => {
@@ -85,15 +93,13 @@ class SwarmApp {
   }
 
   addInput(input) {
-    const newInput = {
-      Keys: ["{ 0; }"],
-      InnerTree: {}
-    };
-
-
+    // const newInput = {
+    //   Keys: ["{ 0; }"],
+    //   InnerTree: {}
+    // };
     const typecode = this.findTypeCodeWithName(input.type);
     const paramName = "SWRM_IN:" + typecode + ":" + input.name;
-    newInput.ParamName = paramName;
+    let newInput = new Input(paramName);
 
     input.values.forEach(function(inp) {
       var tree = [];
@@ -104,9 +110,9 @@ class SwarmApp {
         swarmObj.data = `\"` + inp.Text + `\"`;
         tree.push(swarmObj);
       } else if (typecode == 105 || typecode == 201) { // Number and Slider
-        swarmObj.type = "System.Double";
-        swarmObj.data = inp.Value;
-        tree.push(swarmObj);
+          swarmObj.type = "System.Double";
+          swarmObj.data = inp.Value;
+          tree.push(swarmObj);
       } else if (typecode == 104) { // Integer
         swarmObj.type = "System.Int32";
         swarmObj.data = inp.Value;
@@ -154,38 +160,30 @@ class SwarmApp {
       newInput.Values = tree;
     });
 
-    this.values.push(newInput);
-
-
-    // this.platform = {
-    //         "ParamName": "SWRM_IN:105:A",
-    //         "InnerTree": {
-    //             "{ 0; }": [
-    //                 {
-    //                     "type":"System.Double",
-    //                     "data":5
-    //                 }
-    //             ]
-    //         },
-    //         "Keys":["{ 0; }"],
-    //         "Values":[
-    //             {
-    //                 "type":"System.Double",
-    //                 "data":5
-    //             }
-    //         ],
-    //         "Count": 1,
-    //         "IsReadOnly": false
-    //     }
+    this.inputValues.push(newInput);
   }
 }
 
-// class Document {
-//   constructor(units, tolerance) {
-//     this.units = units;
-//     this.tolerance = tolerance;
-//   }
-// }
+class Input {
+  constructor(name) {
+    this.name = name;
+    this.Keys = ["{ 0; }"];
+    this.InnerTree = {};
+    this.Values = null;
+  }
+}
+
+class Output {
+  constructor(output) {
+    this.name = output.ParamName;
+    this.attribute = output.InnerTree['{ 0; }'].attributes;
+    this.value = null
+  }
+
+  setOutputValue(value) {
+    this.value = token;
+  }
+}
 
 
 module.exports = SwarmApp;
