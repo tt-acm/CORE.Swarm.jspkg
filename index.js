@@ -150,6 +150,7 @@ class SwarmApp {
                 "DisplayColor": ""
               }
             };
+            console.log("currentGeo", currentGeo);
 
             tree.push(currentGeo);
           });
