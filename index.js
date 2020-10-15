@@ -279,6 +279,10 @@ class Output {
     //   this.outputValue = valueArray;
       //output.ReferencedGeometry = swarmOutput.InnerTree['{ 0; }'];
     }
+    else // everything else
+    {
+      this.outputValue = valueArray;
+    }
 
     this.attribute = valueArray[0].attributes;
   }
