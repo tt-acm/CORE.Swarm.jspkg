@@ -51,7 +51,7 @@ class SwarmApp {
   //   this.platform = p;
   // }
 
-  callIntoSwarm() {
+  compute() {
 
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -69,7 +69,7 @@ class SwarmApp {
           .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
           .then((res) => {
             // console.log(`statusCode: ${res.statusCode}`);
-            console.log("res.data", res.data);
+            // console.log("res.data", res.data);
             console.log("res.data.values.InnerTree", res.data.values[0].InnerTree);
             let outputList = [];
 
@@ -78,7 +78,7 @@ class SwarmApp {
               currentOutput.setOutputValue(val.InnerTree['{ 0; }'])
               outputList.push(currentOutput);
             });
-            console.log("outputList", outputList);
+            // console.log("outputList", outputList);
             // resolve(res.data.values[0].InnerTree['{ 0; }']);
             resolve(outputList);
           })
