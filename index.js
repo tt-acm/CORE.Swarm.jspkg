@@ -144,7 +144,7 @@ class SwarmApp {
       } else if (input.hasOwnProperty('ReferencedGeometry')) {
         if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
           input.ReferencedGeometry.forEach(element => {
-            tree.push(JSON.stringify(element));
+            tree.push(element);
           });
         }
       } else {
@@ -158,6 +158,8 @@ class SwarmApp {
         "UserDictionary": {},
         "DisplayColor": ""
       }
+
+      console.log("tree", tree);
 
       newInput.InnerTree["{ 0; }"] = tree;
 
