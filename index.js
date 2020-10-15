@@ -141,7 +141,7 @@ class SwarmApp {
           input.ReferencedGeometry.forEach(element => {
             const currentGeo = {
               type: "Rhino.Geometry.Point",
-              data: JSON.stringify(element),
+              data: JSON.stringify(JSON.stringify(element)),
               attributes: {
                 "Name": null,
                 "LayerName": null,
@@ -160,7 +160,7 @@ class SwarmApp {
           input.ReferencedGeometry.forEach(element => {
             const currentGeo = {
               type: "Rhino.Geometry.PolylineCurve",
-              data: JSON.stringify(element),
+              data: JSON.stringify(JSON.stringify(element)),
               attributes: {
                 "Name": null,
                 "LayerName": null,
