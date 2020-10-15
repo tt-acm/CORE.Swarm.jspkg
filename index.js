@@ -136,7 +136,7 @@ class SwarmApp {
         var selected = inp.Values.find(v => v.Key == inp.Key);
         swarmObj.data = JSON.stringify(selected.Value);
         tree.push(swarmObj);
-      } else if (typecode == 108) { // Points
+      } else if (typecode == 102) { // Points
         if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
           input.ReferencedGeometry.forEach(element => {
             const currentGeo = {
