@@ -144,7 +144,7 @@ class SwarmApp {
       } else if (input.hasOwnProperty('ReferencedGeometry')) {
         if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
           input.ReferencedGeometry.forEach(element => {
-            tree.push(element);
+            tree.push(JSON.stringify(element));
           });
         }
       } else {
