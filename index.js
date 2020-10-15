@@ -69,7 +69,7 @@ class SwarmApp {
           .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
           .then((res) => {
             // console.log(`statusCode: ${res.statusCode}`);
-            // console.log("res.data", res.data);
+            console.log("res.data", res.data);
             console.log("res.data.values.InnerTree", res.data.values[0].InnerTree);
             let outputList = [];
 
