@@ -70,6 +70,7 @@ class SwarmApp {
           .then((res) => {
             // console.log(`statusCode: ${res.statusCode}`);
             console.log("res.data", res.data);
+            console.log("res.data.values.InnerTree", res.data.values.InnerTree);
             let outputList = [];
 
             res.data.values.forEach(function(val) {
