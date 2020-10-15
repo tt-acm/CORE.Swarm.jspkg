@@ -139,7 +139,7 @@ class SwarmApp {
       } else if (typecode == 108) { // Points
         if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
           input.ReferencedGeometry.forEach(element => {
-            var currentGeo = {
+            const currentGeo = {
               type: "Rhino.Geometry.Point",
               data: element,
               attributes: {
@@ -150,6 +150,8 @@ class SwarmApp {
                 "DisplayColor": ""
               }
             };
+
+            tree.push(currentGeo);
           });
         }
       } else if (typecode == 306) {
