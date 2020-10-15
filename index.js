@@ -155,6 +155,25 @@ class SwarmApp {
             tree.push(currentGeo);
           });
         }
+      } else if (typecode == 108) { // Curves
+        if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
+          input.ReferencedGeometry.forEach(element => {
+            const currentGeo = {
+              type: "Rhino.Geometry.PolylineCurve",
+              data: JSON.stringify(element),
+              attributes: {
+                "Name": null,
+                "LayerName": null,
+                "LayerIndex": -1,
+                "UserDictionary": {},
+                "DisplayColor": ""
+              }
+            };
+            console.log("currentGeo", currentGeo);
+
+            tree.push(currentGeo);
+          });
+        }
       } else if (typecode == 306) {
         console.log("TODO not sure how swarm object ", inp);
         swarmObj.type = "System.Object";
