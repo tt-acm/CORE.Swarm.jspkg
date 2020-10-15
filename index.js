@@ -139,7 +139,7 @@ class SwarmApp {
       } else if (typecode == 102) { // Points
         if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
           input.ReferencedGeometry.forEach(element => {
-            const currentGeo = {
+            // const currentGeo = {
             //   type: "Rhino.Geometry.Point",
             //   data: JSON.stringify(element),
             //   attributes: {
