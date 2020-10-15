@@ -143,7 +143,7 @@ class SwarmApp {
             const currentGeo = {
               type: "Rhino.Geometry.Point3D",
               // data: JSON.stringify(element),
-              data: "{\'version\':10000,\'archive3dm\':60,\'opennurbs\':-1912572244,\'data\':\'+n8CAFUAAAAAAAAA+/8CABQAAAAAAAAAHRoQw1fx0xG/5wAQgwEi8ExUB6T8/wIAHQAAAAAAAAAQZmZmZmbmMkAAAAAAAIA2wDMzMzMzMwdAUhNs2/9/AoAAAAAAAAAAAA==\'}",
+              data: '{"X":13.0,"Y":16.0,"Z":16.0}',
               attributes: {
                 "Name": null,
                 "LayerName": null,
