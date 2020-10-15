@@ -136,6 +136,22 @@ class SwarmApp {
         var selected = inp.Values.find(v => v.Key == inp.Key);
         swarmObj.data = JSON.stringify(selected.Value);
         tree.push(swarmObj);
+      } else if (typecode == 108) { // Points
+        if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
+          input.ReferencedGeometry.forEach(element => {
+            var currentGeo = {
+              type: "Rhino.Geometry.Point",
+              data: element,
+              attributes: {
+                "Name": null,
+                "LayerName": null,
+                "LayerIndex": -1,
+                "UserDictionary": {},
+                "DisplayColor": ""
+              }
+            };
+          });
+        }
       } else if (typecode == 306) {
         console.log("TODO not sure how swarm object ", inp);
         swarmObj.type = "System.Object";
@@ -151,13 +167,13 @@ class SwarmApp {
         console.log("TODO new type ? ", input.type);
       }
 
-      tree.attributes = {
-        "Name": null,
-        "LayerName": null,
-        "LayerIndex": -1,
-        "UserDictionary": {},
-        "DisplayColor": ""
-      }
+      // tree.attributes = {
+      //   "Name": null,
+      //   "LayerName": null,
+      //   "LayerIndex": -1,
+      //   "UserDictionary": {},
+      //   "DisplayColor": ""
+      // }
 
       console.log("tree", tree);
 
