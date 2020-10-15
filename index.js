@@ -141,9 +141,8 @@ class SwarmApp {
         if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
           input.ReferencedGeometry.forEach(element => {
             const currentGeo = {
-              type: "Rhino.Geometry.Point3D",
-              // data: JSON.stringify(element),
-              data: '{"X":13.0,"Y":16.0,"Z":16.0}',
+              type: "Rhino.Geometry.Point3d",
+              data: JSON.stringify(element),
               attributes: {
                 "Name": null,
                 "LayerName": null,
@@ -152,7 +151,7 @@ class SwarmApp {
                 "DisplayColor": ""
               }
             };
-            console.log("currentGeo", currentGeo);
+            // console.log("currentGeo", currentGeo);
             // console.log("point element", element);
 
             tree.push(currentGeo);
