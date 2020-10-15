@@ -163,7 +163,7 @@ class SwarmApp {
             const currentGeo = {
               type: "Rhino.Geometry.PolylineCurve",
               // data: JSON.stringify(element),
-              data: "{\'version\':10000,\'archive3dm\':70,\'opennurbs\':-1912572171,\'data\':\'+n8CAIkAAAAAAAAA+/8CABQAAAAAAAAA5tTXTkfp0xG/5QAQgwEi8E6cu9v8/wIAUQAAAAAAAAAQAgAAAAAAAAAAgDRAAAAAAACAN8BmZmZmZmYCQJqZmZmZWTBAAAAAAACAN0AAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAPA/AwAAAF3X1X3/fwKAAAAAAAAAAAA=\'}",
+              data: "{\'version\':10000,\'archive3dm\':70,\'opennurbs\':-1912572171,\'data\':\'+n8CAIkAAAAAAAAA+/8CABQAAAAAAAAA5tTXTkfp0xG/5QAQgwEi8E6cu9v8/wIAUQAAAAAAAAAQAgAAAGZmZmZm5jJAAAAAAACANsAzMzMzMzMHQAAAAAAAAC1AMzMzMzMzM0AAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAPA/AwAAAD9h5Lj/fwKAAAAAAAAAAAA=\'}",
               attributes: {
                 "Name": null,
                 "LayerName": null,
