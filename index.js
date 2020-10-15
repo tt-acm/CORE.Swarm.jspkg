@@ -140,7 +140,7 @@ class SwarmApp {
         if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
           input.ReferencedGeometry.forEach(element => {
             const currentGeo = {
-              type: "Rhino.Geometry.Point3d",
+              type: "Rhino.Geometry.Point3D",
               // data: JSON.stringify(element),
               data: "{\'version\':10000,\'archive3dm\':60,\'opennurbs\':-1912572244,\'data\':\'+n8CAFUAAAAAAAAA+/8CABQAAAAAAAAAHRoQw1fx0xG/5wAQgwEi8ExUB6T8/wIAHQAAAAAAAAAQZmZmZmbmMkAAAAAAAIA2wDMzMzMzMwdAUhNs2/9/AoAAAAAAAAAAAA==\'}",
               attributes: {
