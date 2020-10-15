@@ -138,45 +138,37 @@ class SwarmApp {
         swarmObj.data = JSON.stringify(selected.Value);
         tree.push(swarmObj);
       } else if (typecode == 102) { // Points
-        if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
-          input.ReferencedGeometry.forEach(element => {
-            const currentGeo = {
-              type: "Rhino.Geometry.Point3d",
-              data: JSON.stringify(element),
-              attributes: {
-                "Name": null,
-                "LayerName": null,
-                "LayerIndex": -1,
-                "UserDictionary": {},
-                "DisplayColor": ""
-              }
-            };
-            // console.log("currentGeo", currentGeo);
-            // console.log("point element", element);
+        const currentGeo = {
+          type: "Rhino.Geometry.Point3d",
+          data: JSON.stringify(inp),
+          attributes: {
+            "Name": null,
+            "LayerName": null,
+            "LayerIndex": -1,
+            "UserDictionary": {},
+            "DisplayColor": ""
+          }
+        };
+        // console.log("currentGeo", currentGeo);
+        // console.log("point element", element);
 
-            tree.push(currentGeo);
-          });
-        }
+        tree.push(currentGeo);
       } else if (typecode == 108) { // Curves
-        if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
-          input.ReferencedGeometry.forEach(element => {
-            const currentGeo = {
-              type: "Rhino.Geometry.PolylineCurve",
-              // data: JSON.stringify(element),
-              data: "{\'version\':10000,\'archive3dm\':70,\'opennurbs\':-1912572171,\'data\':\'+n8CAIkAAAAAAAAA+/8CABQAAAAAAAAA5tTXTkfp0xG/5QAQgwEi8E6cu9v8/wIAUQAAAAAAAAAQAgAAAGZmZmZm5jJAAAAAAACANsAzMzMzMzMHQAAAAAAAAC1AMzMzMzMzM0AAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAPA/AwAAAD9h5Lj/fwKAAAAAAAAAAAA=\'}",
-              attributes: {
-                "Name": null,
-                "LayerName": null,
-                "LayerIndex": -1,
-                "UserDictionary": {},
-                "DisplayColor": ""
-              }
-            };
-            console.log("currentGeo", currentGeo);
+        const currentGeo = {
+          type: "Rhino.Geometry.PolylineCurve",
+          // data: JSON.stringify(inp),
+          data: "{\'version\':10000,\'archive3dm\':70,\'opennurbs\':-1912572171,\'data\':\'+n8CAIkAAAAAAAAA+/8CABQAAAAAAAAA5tTXTkfp0xG/5QAQgwEi8E6cu9v8/wIAUQAAAAAAAAAQAgAAAGZmZmZm5jJAAAAAAACANsAzMzMzMzMHQAAAAAAAAC1AMzMzMzMzM0AAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAPA/AwAAAD9h5Lj/fwKAAAAAAAAAAAA=\'}",
+          attributes: {
+            "Name": null,
+            "LayerName": null,
+            "LayerIndex": -1,
+            "UserDictionary": {},
+            "DisplayColor": ""
+          }
+        };
+        console.log("currentGeo", currentGeo);
 
-            tree.push(currentGeo);
-          });
-        }
+        tree.push(currentGeo);
       } else if (typecode == 306) {
         console.log("TODO not sure how swarm object ", inp);
         swarmObj.type = "System.Object";
