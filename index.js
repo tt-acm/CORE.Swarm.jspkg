@@ -190,13 +190,13 @@ class SwarmApp {
         console.log("TODO new type ? ", input.type);
       }
 
-      // tree.attributes = {
-      //   "Name": null,
-      //   "LayerName": null,
-      //   "LayerIndex": -1,
-      //   "UserDictionary": {},
-      //   "DisplayColor": ""
-      // }
+      tree.attributes = {
+        "Name": null,
+        "LayerName": null,
+        "LayerIndex": -1,
+        "UserDictionary": {},
+        "DisplayColor": ""
+      }
 
       console.log("tree", tree);
 
