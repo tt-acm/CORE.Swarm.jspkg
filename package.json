@@ -1,6 +1,6 @@
 {
   "name": "@ttcorestudio/swarm",
-  "version": "0.0.49",
+  "version": "0.0.50",
   "description": "Private NPM package for calling into the external Swarm Compute API",
   "main": "index.js",
   "scripts": {
