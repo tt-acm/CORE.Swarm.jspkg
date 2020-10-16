@@ -54,40 +54,39 @@ class SwarmApp {
   compute() {
 
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const reqBody = {
-          token: this.appToken,
-          inputs: this.inputValues.map(v => v.toObject())
-        }
 
-        // var jsonString = JSON.stringify(this.inputValues);
-        // reqBody.inputs = JSON.parse(jsonString);
+      const reqBody = {
+        token: this.appToken,
+        inputs: this.inputValues.map(v => v.toObject())
+      }
 
-        //console.log("this.inputValues", this.inputValues);
+      // var jsonString = JSON.stringify(this.inputValues);
+      // reqBody.inputs = JSON.parse(jsonString);
 
-        axios
-          .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
-          .then((res) => {
-            // console.log(`statusCode: ${res.statusCode}`);
-            //console.log("res.data", res.data);
-            //console.log("res.data.values.InnerTree", res.data.values[0].InnerTree);
-            let outputList = [];
+      //console.log("this.inputValues", this.inputValues);
 
-            res.data.values.forEach(function(val) {
-              let currentOutput = new Output(val);
-              currentOutput.setOutputValue(val.InnerTree['{ 0; }'])
-              outputList.push(currentOutput);
-            });
-            // console.log("outputList", outputList);
-            // resolve(res.data.values[0].InnerTree['{ 0; }']);
-            resolve(outputList);
-          })
-          .catch((error) => {
-            console.error(error);
-            reject(`Error in callback ${error}`);
-          })
-        // resolve(this);
-      }, 5000);
+      axios
+        .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
+        .then((res) => {
+          // console.log(`statusCode: ${res.statusCode}`);
+          //console.log("res.data", res.data);
+          //console.log("res.data.values.InnerTree", res.data.values[0].InnerTree);
+          let outputList = [];
+
+          res.data.values.forEach(function (val) {
+            let currentOutput = new Output(val);
+            currentOutput.setOutputValue(val.InnerTree['{ 0; }'])
+            outputList.push(currentOutput);
+          });
+          // console.log("outputList", outputList);
+          // resolve(res.data.values[0].InnerTree['{ 0; }']);
+          resolve(outputList);
+        })
+        .catch((error) => {
+          console.error(error);
+          reject(`Error in callback ${error}`);
+        })
+      // resolve(this);
     });
 
   }
@@ -107,7 +106,7 @@ class SwarmApp {
     const paramName = "SWRM_IN:" + typecode + ":" + input.name;
     let newInput = new Input(paramName);
 
-    input.values.forEach(function(inp) {
+    input.values.forEach(function (inp) {
       var tree = [];
       var swarmObj = {};
       // toSwarmTree
@@ -267,8 +266,8 @@ class Output {
     {
       this.outputValue = JSON.parse(valueArray[0].data);
       //output.Url = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
-    // } else if (output.hasOwnProperty('ReferencedGeometry')) {
-    //   this.outputValue = valueArray;
+      // } else if (output.hasOwnProperty('ReferencedGeometry')) {
+      //   this.outputValue = valueArray;
       //output.ReferencedGeometry = swarmOutput.InnerTree['{ 0; }'];
     }
     else // everything else
