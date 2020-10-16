@@ -161,7 +161,7 @@ class SwarmApp {
             "Name": null,
             "LayerName": null,
             "LayerIndex": -1,
-            "UserDictionary": {},
+            "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
             "DisplayColor": ""
           }
         };
