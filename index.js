@@ -155,9 +155,9 @@ class SwarmApp {
         tree.push(currentGeo);
       } else if (typecode == 108) { // Curves
         const currentGeo = {
-          type: "Rhino.Geometry.PolylineCurve",
+          type: "Rhino.Geometry.PolylineCurve", //maybe we should always be going to a nurbs curve here?
           // data: JSON.stringify(inp),
-          data: "{\'version\':10000,\'archive3dm\':70,\'opennurbs\':-1912572171,\'data\':\'+n8CAIkAAAAAAAAA+/8CABQAAAAAAAAA5tTXTkfp0xG/5QAQgwEi8E6cu9v8/wIAUQAAAAAAAAAQAgAAAGZmZmZm5jJAAAAAAACANsAzMzMzMzMHQAAAAAAAAC1AMzMzMzMzM0AAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAPA/AwAAAD9h5Lj/fwKAAAAAAAAAAAA=\'}",
+          data: JSON.stringify(inp.Value),
           attributes: {
             "Name": null,
             "LayerName": null,
