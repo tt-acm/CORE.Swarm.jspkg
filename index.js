@@ -63,14 +63,14 @@ class SwarmApp {
         // var jsonString = JSON.stringify(this.inputValues);
         // reqBody.inputs = JSON.parse(jsonString);
 
-        console.log("this.inputValues", this.inputValues);
+        //console.log("this.inputValues", this.inputValues);
 
         axios
           .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
           .then((res) => {
             // console.log(`statusCode: ${res.statusCode}`);
-            console.log("res.data", res.data);
-            console.log("res.data.values.InnerTree", res.data.values[0].InnerTree);
+            //console.log("res.data", res.data);
+            //console.log("res.data.values.InnerTree", res.data.values[0].InnerTree);
             let outputList = [];
 
             res.data.values.forEach(function(val) {
@@ -165,7 +165,7 @@ class SwarmApp {
             "DisplayColor": ""
           }
         };
-        console.log("currentGeo", currentGeo);
+        //console.log("currentGeo", currentGeo);
 
         tree.push(currentGeo);
       } else if (typecode == 306) {
@@ -191,7 +191,7 @@ class SwarmApp {
       //   "DisplayColor": ""
       // }
 
-      console.log("tree", tree);
+      //console.log("tree", tree);
 
       newInput.InnerTree["{ 0; }"] = tree;
 
@@ -232,11 +232,11 @@ class Output {
 
   setOutputValue(valueArray) {
     // var valueArray = Object.values(swarmOutput.InnerTree)[0];
-    console.log("output name", this.name);
+    //console.log("output name", this.name);
     if (this.name.split(':').length < 2) return;
     let typecode = this.name.split(':')[1];
 
-    console.log("typecode", typecode);
+    //console.log("typecode", typecode);
     if (typecode == 106) // text
     {
       //output.Text = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
