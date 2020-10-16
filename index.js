@@ -63,14 +63,14 @@ class SwarmApp {
         // var jsonString = JSON.stringify(this.inputValues);
         // reqBody.inputs = JSON.parse(jsonString);
 
-        console.log("this.inputValues", this.inputValues);
+        //console.log("this.inputValues", this.inputValues);
 
         axios
           .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
           .then((res) => {
             // console.log(`statusCode: ${res.statusCode}`);
-            console.log("res.data", res.data);
-            console.log("res.data.values.InnerTree", res.data.values[0].InnerTree);
+            //console.log("res.data", res.data);
+            //console.log("res.data.values.InnerTree", res.data.values[0].InnerTree);
             let outputList = [];
 
             res.data.values.forEach(function(val) {
@@ -140,7 +140,7 @@ class SwarmApp {
       } else if (typecode == 102) { // Points
         const currentGeo = {
           type: "Rhino.Geometry.Point3d",
-          data: JSON.stringify(inp),
+          data: JSON.stringify(inp.Value),
           attributes: {
             "Name": null,
             "LayerName": null,
@@ -155,18 +155,17 @@ class SwarmApp {
         tree.push(currentGeo);
       } else if (typecode == 108) { // Curves
         const currentGeo = {
-          type: "Rhino.Geometry.PolylineCurve",
-          // data: JSON.stringify(inp),
-          data: "{\'version\':10000,\'archive3dm\':70,\'opennurbs\':-1912572171,\'data\':\'+n8CAIkAAAAAAAAA+/8CABQAAAAAAAAA5tTXTkfp0xG/5QAQgwEi8E6cu9v8/wIAUQAAAAAAAAAQAgAAAGZmZmZm5jJAAAAAAACANsAzMzMzMzMHQAAAAAAAAC1AMzMzMzMzM0AAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAPA/AwAAAD9h5Lj/fwKAAAAAAAAAAAA=\'}",
+          type: "Rhino.Geometry.NurbsCurve",
+          data: JSON.stringify(inp.Value),
           attributes: {
             "Name": null,
             "LayerName": null,
             "LayerIndex": -1,
-            "UserDictionary": {},
+            "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
             "DisplayColor": ""
           }
         };
-        console.log("currentGeo", currentGeo);
+        //console.log("currentGeo", currentGeo);
 
         tree.push(currentGeo);
       } else if (typecode == 306) {
@@ -192,7 +191,7 @@ class SwarmApp {
       //   "DisplayColor": ""
       // }
 
-      console.log("tree", tree);
+      //console.log("tree", tree);
 
       newInput.InnerTree["{ 0; }"] = tree;
 
@@ -233,11 +232,11 @@ class Output {
 
   setOutputValue(valueArray) {
     // var valueArray = Object.values(swarmOutput.InnerTree)[0];
-    console.log("output name", this.name);
+    //console.log("output name", this.name);
     if (this.name.split(':').length < 2) return;
     let typecode = this.name.split(':')[1];
 
-    console.log("typecode", typecode);
+    //console.log("typecode", typecode);
     if (typecode == 106) // text
     {
       //output.Text = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
