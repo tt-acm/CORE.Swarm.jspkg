@@ -140,7 +140,7 @@ class SwarmApp {
       } else if (typecode == 102) { // Points
         const currentGeo = {
           type: "Rhino.Geometry.Point3d",
-          data: JSON.stringify(inp),
+          data: JSON.stringify(inp.Value),
           attributes: {
             "Name": null,
             "LayerName": null,
