@@ -167,6 +167,37 @@ class SwarmApp {
         //console.log("currentGeo", currentGeo);
 
         tree.push(currentGeo);
+      } else if (typecode == 114) { // Brep
+        const currentGeo = {
+          type: "Rhino.Geometry.Brep",
+          data: JSON.stringify(inp.Value),
+          attributes: {
+            "Name": null,
+            "LayerName": null,
+            "LayerIndex": -1,
+            "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
+            "DisplayColor": ""
+          }
+        };
+        console.log("currentGeo", currentGeo);
+
+        tree.push(currentGeo);
+      } else if (typecode == 115) { // Mesh
+        console.log("coming here mesh");
+        const currentGeo = {
+          type: "Rhino.Geometry.Mesh",
+          data: JSON.stringify(inp.Value),
+          attributes: {
+            "Name": null,
+            "LayerName": null,
+            "LayerIndex": -1,
+            "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
+            "DisplayColor": ""
+          }
+        };
+        console.log("currentGeo", currentGeo);
+
+        tree.push(currentGeo);
       } else if (typecode == 306) {
         console.log("TODO not sure how swarm object ", inp);
         swarmObj.type = "System.Object";
