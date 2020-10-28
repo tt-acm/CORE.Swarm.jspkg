@@ -66,7 +66,7 @@ class SwarmApp {
       //console.log("this.inputValues", this.inputValues);
 
       axios
-        .post('https://dev-swarm.herokuapp.com/api/external/compute', reqBody)
+        .post('https://swarm.thorntontomasetti.com/api/external/compute', reqBody)
         .then((res) => {
           // console.log(`statusCode: ${res.statusCode}`);
           //console.log("res.data", res.data);
