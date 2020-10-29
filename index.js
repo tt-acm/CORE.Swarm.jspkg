@@ -256,7 +256,7 @@ class Input {
 class Output {
   constructor(output) {
     this.name = output.ParamName;
-    this.attribute = output.InnerTree['{ 0; }'].attributes;
+    this.attribute = output.InnerTree.hasOwnProperty('{ 0; }') ? output.InnerTree['{ 0; }'].attributes : null;
     this.outputValue = null
   }
 
@@ -303,10 +303,10 @@ class Output {
     }
     else // everything else
     {
-      this.outputValue = valueArray;
+      this.outputValue = valueArray !== undefined ? valueArray : null ;
     }
 
-    this.attribute = valueArray[0].attributes;
+    this.attribute = valueArray !== undefined ? valueArray[0].attributes : null ;
   }
 }
 
