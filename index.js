@@ -253,7 +253,6 @@ class Input {
 
 class Output {
   constructor(output) {
-    // console.log("output.InnerTree", output.InnerTree);
     this.name = output.ParamName;
     this.branchIndex = Object.values(output.InnerTree)? Object.values(output.InnerTree)[0]: null;
     if (this.branchIndex && output.InnerTree[this.branchIndex]) this.attribute = output.InnerTree[this.branchIndex].attributes;
@@ -262,11 +261,10 @@ class Output {
 
   setOutputValue(valueArray) {
     // var valueArray = Object.values(swarmOutput.InnerTree)[0];
-    console.log("output name", this.name);
     if (this.name.split(':').length < 2) return;
     let typecode = this.name.split(':')[1];
 
-    console.log("typecode", typecode);
+    // console.log("typecode", typecode);
 
     //console.log("typecode", typecode);
     if (typecode == 106) // text
