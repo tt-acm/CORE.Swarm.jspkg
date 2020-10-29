@@ -255,6 +255,7 @@ class Output {
   constructor(output) {
     // console.log("output.InnerTree", output.InnerTree);
     this.name = output.ParamName;
+    this.branchIndex = if (Object.values(output.InnerTree))? Object.values(output.InnerTree)[0]]: null;
 
     if (output.InnerTree[Object.values(output.InnerTree)[0]]) this.attribute = output.InnerTree[Object.values(output.InnerTree)[0]].attributes;
     this.outputValue = null
@@ -305,10 +306,10 @@ class Output {
     }
     else // everything else
     {
-      this.outputValue = valueArray;
+      this.outputValue = valueArray !== undefined ? valueArray : null ;
     }
 
-    this.attribute = valueArray[0].attributes;
+    this.attribute = valueArray !== undefined ? valueArray[0].attributes : null ;
   }
 }
 
