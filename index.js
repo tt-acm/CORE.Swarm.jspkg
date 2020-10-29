@@ -75,7 +75,8 @@ class SwarmApp {
 
           res.data.values.forEach(function (val) {
             let currentOutput = new Output(val);
-            currentOutput.setOutputValue(val.InnerTree['{ 0; }'])
+            var valueArray = Object.values(val.InnerTree)[0];
+            currentOutput.setOutputValue(valueArray)
             outputList.push(currentOutput);
           });
           // console.log("outputList", outputList);
@@ -179,11 +180,9 @@ class SwarmApp {
             "DisplayColor": ""
           }
         };
-        console.log("currentGeo", currentGeo);
 
         tree.push(currentGeo);
       } else if (typecode == 115) { // Mesh
-        console.log("coming here mesh");
         const currentGeo = {
           type: "Rhino.Geometry.Mesh",
           data: JSON.stringify(inp.Value),
@@ -195,7 +194,6 @@ class SwarmApp {
             "DisplayColor": ""
           }
         };
-        console.log("currentGeo", currentGeo);
 
         tree.push(currentGeo);
       } else if (typecode == 306) {
@@ -256,15 +254,17 @@ class Input {
 class Output {
   constructor(output) {
     this.name = output.ParamName;
-    this.attribute = output.InnerTree.hasOwnProperty('{ 0; }') ? output.InnerTree['{ 0; }'].attributes : null;
+    this.branchIndex = Object.values(output.InnerTree)? Object.values(output.InnerTree)[0]: null;
+    if (this.branchIndex && output.InnerTree[this.branchIndex]) this.attribute = output.InnerTree[this.branchIndex].attributes;
     this.outputValue = null
   }
 
   setOutputValue(valueArray) {
     // var valueArray = Object.values(swarmOutput.InnerTree)[0];
-    //console.log("output name", this.name);
     if (this.name.split(':').length < 2) return;
     let typecode = this.name.split(':')[1];
+
+    // console.log("typecode", typecode);
 
     //console.log("typecode", typecode);
     if (typecode == 106) // text
