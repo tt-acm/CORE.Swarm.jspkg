@@ -261,7 +261,9 @@ class Output {
 
   setOutputValue(valueArray) {
     // var valueArray = Object.values(swarmOutput.InnerTree)[0];
+    if(valueArray === undefined) return;
     if (this.name.split(':').length < 2) return;
+
     let typecode = this.name.split(':')[1];
 
     // console.log("typecode", typecode);
@@ -270,7 +272,7 @@ class Output {
     if (typecode == 106) // text
     {
       //output.Text = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
-      this.outputValue = JSON.parse(valueArray[0].data);
+      this.outputValue = valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
     } else if (typecode == 301 || typecode == 302) // multiline panel
     {
       var concat = valueArray.map(val => {
@@ -280,22 +282,22 @@ class Output {
       this.outputValue = concat.join(",");
     } else if (typecode == 104 || typecode == 105 || typecode == 201) // integer and Number || Slider
     {
-      this.outputValue = JSON.parse(valueArray[0].data);
+      this.outputValue = valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
       //output.Value = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data)
     }
     else if (typecode == 101 || typecode == 202) // boolean || boolean Togle
     {
-      this.outputValue = JSON.parse(valueArray[0].data);
+      this.outputValue = valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
       //output.State = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data == "true");
     }
     else if (typecode == 116) // time
     {
-      this.outputValue = JSON.parse(valueArray[0].data);
+      this.outputValue = valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
       //output.SelectedDateTime = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
     }
     else if (typecode == 305) // url
     {
-      this.outputValue = JSON.parse(valueArray[0].data);
+      this.outputValue = valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
       //output.Url = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
       // } else if (output.hasOwnProperty('ReferencedGeometry')) {
       //   this.outputValue = valueArray;
@@ -306,7 +308,7 @@ class Output {
       this.outputValue = valueArray !== undefined ? valueArray : null ;
     }
 
-    this.attribute = valueArray !== undefined ? valueArray[0].attributes : null ;
+    this.attribute = valueArray !== undefined && valueArray.length != 0  ? valueArray[0].attributes : null ;
   }
 }
 
