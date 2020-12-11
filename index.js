@@ -260,6 +260,7 @@ class Output {
   }
 
   setOutputValue(valueArray) {
+    console.log("valueArray", valueArray);
     // var valueArray = Object.values(swarmOutput.InnerTree)[0];
     if (this.name.split(':').length < 2) return;
     let typecode = this.name.split(':')[1];
