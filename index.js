@@ -62,26 +62,25 @@ class SwarmApp {
 
       // var jsonString = JSON.stringify(this.inputValues);
       // reqBody.inputs = JSON.parse(jsonString);
-
-      //console.log("this.inputValues", this.inputValues);
+      // console.log("this.inputValues", this.inputValues);
 
       axios
         .post('https://swarm.thorntontomasetti.com/api/external/compute', reqBody)
         .then((res) => {
-          // console.log(`statusCode: ${res.statusCode}`);
-          //console.log("res.data", res.data);
+          // console.log("res.data", res.data.supplemental);
           //console.log("res.data.values.InnerTree", res.data.values[0].InnerTree);
-          let outputList = [];
+          const returnedResult = {
+            spectaclesElements : res.data.supplemental,
+            outputList: []
+          }
 
           res.data.values.forEach(function (val) {
             let currentOutput = new Output(val);
             var valueArray = Object.values(val.InnerTree)[0];
             currentOutput.setOutputValue(valueArray)
-            outputList.push(currentOutput);
+            returnedResult.outputList.push(currentOutput);
           });
-          // console.log("outputList", outputList);
-          // resolve(res.data.values[0].InnerTree['{ 0; }']);
-          resolve(outputList);
+          resolve(returnedResult);
         })
         .catch((error) => {
           console.error(error);
