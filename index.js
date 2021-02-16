@@ -34,6 +34,7 @@ class SwarmApp {
     this.appToken = null;
     this.localPort = null;
     this.userId = null;
+    this.startTime = new Date();
   }
 
   // Method
@@ -65,7 +66,6 @@ class SwarmApp {
       }
       let postRoute = swarmUrl + '/compute';
       if (this.localPort != null) postRoute = 'http://localhost:' + this.localPort + '/api/external/compute';
-      console.log("Current Swarm Url:", postRoute);
 
       axios
         .post(postRoute, reqBody)
@@ -82,6 +82,10 @@ class SwarmApp {
             currentOutput.setOutputValue(valueArray)
             returnedResult.outputList.push(currentOutput);
           });
+
+          const elapsedTime = new Date() - this.startTime;
+          console.log("SWARM COMPUTE FINISHED AFTER " + elapsedTime/1000 + " seconds");
+
           resolve(returnedResult);
         })
         .catch((error) => {
@@ -93,6 +97,7 @@ class SwarmApp {
   }
 
   runLongCompute() {
+    const startTime = this.startTime;
     return new Promise((resolve, reject) => {
       const reqBody = {
         token: this.appToken,
@@ -101,7 +106,6 @@ class SwarmApp {
       }
       let postRoute = swarmUrl + '/request-long-compute';
       if (this.localPort != null) postRoute = 'http://localhost:' + this.localPort + '/api/external/request-long-compute';
-      console.log("Current Swarm Url:", postRoute);
 
       // your callback gets executed automatically once the data is received
       var retrieveComputeDataCallback = (computeId, error) => {
@@ -170,6 +174,9 @@ class SwarmApp {
             currentOutput.setOutputValue(valueArray)
             returnedResult.outputList.push(currentOutput);
           });
+
+          const elapsedTime = new Date() - startTime;
+          console.log("SWARM COMPUTE FINISHED AFTER " + elapsedTime/1000 + " seconds");
           resolve(returnedResult);
 
         }).catch(error => {
