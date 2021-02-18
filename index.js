@@ -114,7 +114,7 @@ class SwarmApp {
             console.error(error);
             return;
         }
-        console.log("Retrieving compute from id: ",computeId);
+        // console.log("Retrieving compute from id: ",computeId);
 
         // return new Promise((resolve, reject) => {});
 
@@ -122,7 +122,7 @@ class SwarmApp {
         .post(swarmUrl + '/get-compute-results', {_id: computeId, token: reqBody.token})
         .then(async function(res) {
           await sleep(1000);
-          console.log("Retrieved s3 link", res.data);
+          // console.log("Retrieved s3 link", res.data);
 
           if (res.data) retrieveFullComputeFromS3(res.data);
           else reject("Didn't return a signed s3 link");
@@ -141,7 +141,7 @@ class SwarmApp {
         }).then(async function(response) {
             // request successful
             if(response.data == "Compute Finished!") {
-              console.log("Compute outputs saved to S3!");
+              // console.log("Compute outputs saved to S3!");
               // server done, deliver data to script to consume
               retrieveComputeDataCallback(computeId);
             }
@@ -161,7 +161,7 @@ class SwarmApp {
 
       function retrieveFullComputeFromS3(url, callback) {
         axios.get(url).then(res => {
-          console.log("Retrieved response from s3");
+          // console.log("Retrieved response from s3");
 
           const returnedResult = {
             spectaclesElements : res.data.supplemental,
