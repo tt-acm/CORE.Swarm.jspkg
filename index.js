@@ -35,6 +35,7 @@ class SwarmApp {
     this.localPort = null;
     this.userId = null;
     this.startTime = new Date();
+    this.logging = false;
   }
 
   // Method
@@ -84,7 +85,7 @@ class SwarmApp {
           });
 
           const elapsedTime = new Date() - this.startTime;
-          console.log("SWARM COMPUTE FINISHED AFTER " + elapsedTime/1000 + " seconds");
+          if (this.logging) console.log("SWARM COMPUTE FINISHED AFTER " + elapsedTime/1000 + " seconds");
 
           resolve(returnedResult);
         })
@@ -98,6 +99,7 @@ class SwarmApp {
 
   runLongCompute() {
     const startTime = this.startTime;
+    const log = this.logging;
     return new Promise((resolve, reject) => {
       const reqBody = {
         token: this.appToken,
@@ -176,7 +178,7 @@ class SwarmApp {
           });
 
           const elapsedTime = new Date() - startTime;
-          console.log("SWARM COMPUTE FINISHED AFTER " + elapsedTime/1000 + " seconds");
+          if (log) console.log("SWARM COMPUTE FINISHED AFTER " + elapsedTime/1000 + " seconds");
           resolve(returnedResult);
 
         }).catch(error => {
