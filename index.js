@@ -77,11 +77,15 @@ class SwarmApp {
             outputList: []
           }
 
+          if (res.data.values == null) return resolve(null);
+
           res.data.values.forEach(function (val) {
             let currentOutput = new Output(val);
             var valueArray = Object.values(val.InnerTree)[0];
-            currentOutput.setOutputValue(valueArray)
-            returnedResult.outputList.push(currentOutput);
+            if (valueArray != null) {
+              currentOutput.setOutputValue(valueArray)
+              returnedResult.outputList.push(currentOutput);
+            }            
           });
 
           const elapsedTime = new Date() - this.startTime;
@@ -149,7 +153,7 @@ class SwarmApp {
             }
             else {
               await sleep(1000);
-              console.log("retrying...");
+              if (log) console.log("retrying...");
               requestComputeStatus(computeId, callback);
             }
         }).catch(error => {
@@ -170,11 +174,15 @@ class SwarmApp {
             outputList: []
           }
 
+          if (res.data.values == null) return resolve(null);
+
           res.data.values.forEach(function (val) {
             let currentOutput = new Output(val);
             var valueArray = Object.values(val.InnerTree)[0];
-            currentOutput.setOutputValue(valueArray)
-            returnedResult.outputList.push(currentOutput);
+            if (valueArray != null) {
+              currentOutput.setOutputValue(valueArray)
+              returnedResult.outputList.push(currentOutput);
+            }            
           });
 
           const elapsedTime = new Date() - startTime;
@@ -378,6 +386,7 @@ class Output {
 
   setOutputValue(valueArray) {
     // var valueArray = Object.values(swarmOutput.InnerTree)[0];
+    if (valueArray == null) return;
     if (this.name.split(':').length < 2) return;
     let typecode = this.name.split(':')[1];
 
