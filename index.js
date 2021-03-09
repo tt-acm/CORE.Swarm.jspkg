@@ -60,6 +60,7 @@ class SwarmApp {
   compute() {
 
     return new Promise((resolve, reject) => {
+      this.startTime = new Date();
       const reqBody = {
         token: this.appToken,
         inputs: this.inputValues.map(v => v.toObject()),
@@ -88,8 +89,9 @@ class SwarmApp {
             }            
           });
 
-          const elapsedTime = new Date() - this.startTime;
-          if (this.logging) console.log("SWARM COMPUTE FINISHED AFTER " + elapsedTime/1000 + " seconds");
+          var endTime = new Date();
+          const seconds = (endTime.getTime() - this.startTime.getTime()) / 1000;
+          if (this.logging) console.log("SWARM COMPUTE FINISHED AFTER " + seconds+ " seconds");
 
           resolve(returnedResult);
         })
