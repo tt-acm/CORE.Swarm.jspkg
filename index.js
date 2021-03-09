@@ -22,14 +22,20 @@ const typeDict = {
   203: "Value List",
   301: "Panel",
   302: "MultilinePanel"
-}
+};
 
+// cost swarmUrl = "https://dev-swarm.herokuapp.com/api/external";
+const swarmUrl = "https://swarm.thorntontomasetti.com/api/external";
 
 class SwarmApp {
   constructor(units, tolerance) {
     this.document = null;
     this.inputValues = [];
     this.appToken = null;
+    this.localPort = null;
+    this.userId = null;
+    this.startTime = new Date();
+    this.logging = false;
   }
 
   // Method
@@ -54,42 +60,161 @@ class SwarmApp {
   compute() {
 
     return new Promise((resolve, reject) => {
-
       const reqBody = {
         token: this.appToken,
-        inputs: this.inputValues.map(v => v.toObject())
+        inputs: this.inputValues.map(v => v.toObject()),
+        userId: this.userId
       }
-
-      // var jsonString = JSON.stringify(this.inputValues);
-      // reqBody.inputs = JSON.parse(jsonString);
-
-      //console.log("this.inputValues", this.inputValues);
+      let postRoute = swarmUrl + '/compute';
+      if (this.localPort != null) postRoute = 'http://localhost:' + this.localPort + '/api/external/compute';
 
       axios
-        .post('https://swarm.thorntontomasetti.com/api/external/compute', reqBody)
+        .post(postRoute, reqBody)
         .then((res) => {
-          // console.log(`statusCode: ${res.statusCode}`);
-          //console.log("res.data", res.data);
           //console.log("res.data.values.InnerTree", res.data.values[0].InnerTree);
-          let outputList = [];
+          const returnedResult = {
+            spectaclesElements : res.data.supplemental,
+            outputList: []
+          }
+
+          if (res.data.values == null) return resolve(null);
 
           res.data.values.forEach(function (val) {
             let currentOutput = new Output(val);
             var valueArray = Object.values(val.InnerTree)[0];
-            currentOutput.setOutputValue(valueArray)
-            outputList.push(currentOutput);
+            if (valueArray != null) {
+              currentOutput.setOutputValue(valueArray)
+              returnedResult.outputList.push(currentOutput);
+            }            
           });
-          // console.log("outputList", outputList);
-          // resolve(res.data.values[0].InnerTree['{ 0; }']);
-          resolve(outputList);
+
+          const elapsedTime = new Date() - this.startTime;
+          if (this.logging) console.log("SWARM COMPUTE FINISHED AFTER " + elapsedTime/1000 + " seconds");
+
+          resolve(returnedResult);
         })
         .catch((error) => {
           console.error(error);
           reject(`Error in callback ${error}`);
         })
-      // resolve(this);
     });
 
+  }
+
+  runLongCompute() {
+    const startTime = this.startTime;
+    const log = this.logging;
+    return new Promise((resolve, reject) => {
+      const reqBody = {
+        token: this.appToken,
+        inputs: this.inputValues.map(v => v.toObject()),
+        userId: this.userId
+      }
+      let postRoute = swarmUrl + '/request-long-compute';
+      if (this.localPort != null) postRoute = 'http://localhost:' + this.localPort + '/api/external/request-long-compute';
+
+      // your callback gets executed automatically once the data is received
+      var retrieveComputeDataCallback = (computeId, error) => {
+        // consume data
+        if (error) {
+            console.error(error);
+            return;
+        }
+        // console.log("Retrieving compute from id: ",computeId);
+
+        // return new Promise((resolve, reject) => {});
+
+        axios
+        .post(swarmUrl + '/get-compute-results', {_id: computeId, token: reqBody.token})
+        .then(async function(res) {
+          await sleep(1000);
+          // console.log("Retrieved s3 link", res.data);
+
+          if (res.data) retrieveFullComputeFromS3(res.data);
+          else reject("Didn't return a signed s3 link");
+        })
+        .catch((error) => {
+          console.error(error);
+          reject(`Error in callback ${error}`);
+        })
+      };
+
+      // Check compute status
+      function requestComputeStatus(computeId, callback) {
+        axios.post(swarmUrl + '/check-compute-status', {
+          mongoId:computeId,
+          token: reqBody.token
+        }).then(async function(response) {
+            // request successful
+            if(response.data == "Compute Finished!") {
+              // console.log("Compute outputs saved to S3!");
+              // server done, deliver data to script to consume
+              retrieveComputeDataCallback(computeId);
+            }
+            else {
+              await sleep(1000);
+              if (log) console.log("retrying...");
+              requestComputeStatus(computeId, callback);
+            }
+        }).catch(error => {
+            // ajax error occurred
+            // would be better to not retry on 404, 500 and other unrecoverable HTTP errors
+            // retry, if any retries left
+            console.log("failed, retrying...", error);
+            requestComputeStatus(computeId, callback);
+        });
+      }
+
+      function retrieveFullComputeFromS3(url, callback) {
+        axios.get(url).then(res => {
+          // console.log("Retrieved response from s3");
+
+          const returnedResult = {
+            spectaclesElements : res.data.supplemental,
+            outputList: []
+          }
+
+          if (res.data.values == null) return resolve(null);
+
+          res.data.values.forEach(function (val) {
+            let currentOutput = new Output(val);
+            var valueArray = Object.values(val.InnerTree)[0];
+            if (valueArray != null) {
+              currentOutput.setOutputValue(valueArray)
+              returnedResult.outputList.push(currentOutput);
+            }            
+          });
+
+          const elapsedTime = new Date() - startTime;
+          if (log) console.log("SWARM COMPUTE FINISHED AFTER " + elapsedTime/1000 + " seconds");
+          resolve(returnedResult);
+
+        }).catch(error => {
+            // ajax error occurred
+            // would be better to not retry on 404, 500 and other unrecoverable HTTP errors
+            // retry, if any retries left
+            console.log(error);
+        });
+      }
+
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+
+      // Send out long compute
+      axios
+        .post(postRoute, reqBody)
+        .then((res) => {
+          if (res.data == null) reject('No compute id was returned');
+
+          requestComputeStatus(res.data, retrieveComputeDataCallback);
+        })
+        .catch((error) => {
+          // console.error(error);
+          reject(`Error in callback ${error}`);
+        })
+    });
   }
 
   findTypeCodeWithName(typeName) {
@@ -261,7 +386,8 @@ class Output {
 
   setOutputValue(valueArray) {
     // var valueArray = Object.values(swarmOutput.InnerTree)[0];
-    if(valueArray === undefined) return;
+    if(valueArray === undefined || valueArray == null) return;
+    
     if (this.name.split(':').length < 2) return;
 
     let typecode = this.name.split(':')[1];
