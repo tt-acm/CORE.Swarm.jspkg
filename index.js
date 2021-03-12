@@ -35,6 +35,7 @@ class SwarmApp {
     this.localPort = null;
     this.userId = null;
     this.logging = false;
+    this.inputs = [];
   }
 
   // Method
@@ -62,10 +63,11 @@ class SwarmApp {
       const startTime = new Date();
       const reqBody = {
         token: this.appToken,
-        inputs: this.inputValues.map(v => v.toObject()),
+        // inputs: this.inputValues.map(v => v.toObject()),
+        inputs: this.inputs.map(inp => inp.toObject()),
         userId: this.userId
       }
-      
+
       let postRoute = swarmUrl + '/compute';
       if (this.localPort != null) postRoute = 'http://localhost:' + this.localPort + '/api/external/compute';
 
@@ -79,7 +81,6 @@ class SwarmApp {
 
           if (res.data.values == null) return resolve(null);
 
-          // Outputing data to each corresponding branch
           res.data.values.forEach(function (val) {
             let currentOutput = new Output();
             currentOutput.populateOutput(val);
@@ -176,7 +177,6 @@ class SwarmApp {
 
           if (res.data.values == null) return resolve(null);
 
-          // Outputing data to each corresponding branch
           res.data.values.forEach(function (val) {
             let currentOutput = new Output();
             currentOutput.populateOutput(val);
@@ -215,131 +215,13 @@ class SwarmApp {
         })
     });
   }
+  
 
-  findTypeCodeWithName(typeName) {
-    const typeIndex = Object.values(typeDict).indexOf(typeName);
-    if (typeIndex > -1) return Object.keys(typeDict)[typeIndex];
-    else return null;
-  }
-
-  formatInputVal(inp, typecode) {
-    // var tree = [];
-    var swarmObj = {};
-    // toSwarmTree
-    if (typecode == 106 || typecode == 301 || typecode == 302) { // Text
-      swarmObj.type = "System.String";
-      swarmObj.data = `\"` + inp.Text + `\"`;
-      // tree.push(swarmObj);
-    } else if (typecode == 105 || typecode == 201) { // Number and Slider
-      swarmObj.type = "System.Double";
-      swarmObj.data = inp.Value;
-      // tree.push(swarmObj);
-    } else if (typecode == 104) { // Integer
-      swarmObj.type = "System.Int32";
-      swarmObj.data = inp.Value;
-      // tree.push(swarmObj);
-    } else if (typecode == 101 || typecode == 202) { // Boolean or Boolean Toogle
-      swarmObj.type = "System.Boolean";
-      //console.log("in.State", in.State);
-      swarmObj.data = `\"` + inp.State + `\"`;
-      // tree.push(swarmObj);
-    } else if (typecode == 116) { // Time
-      swarmObj.type = "System.DateTime";
-      swarmObj.data = `\"` + inp.SelectedDateTime + `\"`;
-      // tree.push(swarmObj);
-    } else if (typecode == 203) { // Value List
-      swarmObj.type = "System.String";
-      var selected = inp.Values.find(v => v.Key == inp.Key);
-      swarmObj.data = JSON.stringify(selected.Value);
-      // tree.push(swarmObj);
-    } else if (typecode == 102) { // Points
-      const currentGeo = {
-        type: "Rhino.Geometry.Point3d",
-        data: JSON.stringify(inp.Value),
-        attributes: {
-          "Name": null,
-          "LayerName": null,
-          "LayerIndex": -1,
-          "UserDictionary": {},
-          "DisplayColor": ""
-        }
-      };
-      // console.log("currentGeo", currentGeo);
-      // console.log("point element", element);
-      swarmObj = currentGeo;
-
-      // tree.push(currentGeo);
-    } else if (typecode == 108) { // Curves
-      const currentGeo = {
-        type: "Rhino.Geometry.NurbsCurve",
-        data: JSON.stringify(inp.Value),
-        attributes: {
-          "Name": null,
-          "LayerName": null,
-          "LayerIndex": -1,
-          "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
-          "DisplayColor": ""
-        }
-      };
-      //console.log("currentGeo", currentGeo);
-      swarmObj = currentGeo;
-
-      // tree.push(currentGeo);
-    } else if (typecode == 114) { // Brep
-      const currentGeo = {
-        type: "Rhino.Geometry.Brep",
-        data: JSON.stringify(inp.Value),
-        attributes: {
-          "Name": null,
-          "LayerName": null,
-          "LayerIndex": -1,
-          "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
-          "DisplayColor": ""
-        }
-      };
-      swarmObj = currentGeo;
-
-      // tree.push(currentGeo);
-    } else if (typecode == 115) { // Mesh
-      const currentGeo = {
-        type: "Rhino.Geometry.Mesh",
-        data: JSON.stringify(inp.Value),
-        attributes: {
-          "Name": null,
-          "LayerName": null,
-          "LayerIndex": -1,
-          "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
-          "DisplayColor": ""
-        }
-      };
-      swarmObj = currentGeo;
-
-      // tree.push(currentGeo);
-    } else if (typecode == 306) {
-      console.log("TODO not sure how swarm object ", inp);
-      swarmObj.type = "System.Object";
-      swarmObj.data = JSON.stringify(inp.Lines);
-      // tree.push(swarmObj);
-    } else if (input.hasOwnProperty('ReferencedGeometry')) {
-      if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
-        input.ReferencedGeometry.forEach(element => {
-          // tree.push(element);
-        });
-      }
-    } else {
-      console.log("TODO new type ? ", input.type);
-    }
-
-    return swarmObj;
-  }
-
-  addTreeInput(input) {
-    const self = this;
-    const typecode = this.findTypeCodeWithName(input.type);
-    const paramName = "SWRM_IN:" + typecode + ":" + input.name;
-    let newInput = new Input(paramName);
-
+  addTreeInput(input) {    
+    let newInput = new Input(input.name, input.type);
     const inputDataPaths = Object.keys(input.values);
+
+    console.log("newInput", newInput);
 
     var i;
     for (i = 0; i < inputDataPaths.length; i++) {
@@ -350,7 +232,7 @@ class SwarmApp {
 
       currnetPath.forEach(function (inp) {
         // Looping through items in each branch
-        let curInputVal = self.formatInputVal(inp, typecode);
+        let curInputVal = formatInputVal(inp, newInput.Typecode);
         currnetPathVal.push(curInputVal);
       });
 
@@ -372,10 +254,7 @@ class SwarmApp {
   }
 
   addInput(input) {
-    const self = this;
-    const typecode = this.findTypeCodeWithName(input.type);
-    const paramName = "SWRM_IN:" + typecode + ":" + input.name;
-    let newInput = new Input(paramName);
+    let newInput = new Input(input.name, input.type);
 
     if (input.values == null) return console.log("Null input value");
     else if (!Array.isArray(input.values)) return console.log("Please use the addTreeInput method for tree inputs.");
@@ -383,7 +262,7 @@ class SwarmApp {
 
     let currnetPathVal = [];
     input.values.forEach(function (inp) {
-      let curInputVal = self.formatInputVal(inp, typecode);
+      let curInputVal = formatInputVal(inp, newInput.Typecode);
       currnetPathVal.push(curInputVal);
     });
 
@@ -403,24 +282,66 @@ class SwarmApp {
   }
 }
 
+class DataTree {
+  constructor(type) {
+    this.InnerTreeData = {"{ 0; }":[]};
+    this.typecode = type;
+  }  
+
+  initBranches(count) {
+    if (count == null || typeof(count) != number) return console.log("Invalid branch count");
+
+    var currentPathName = "{ 0; }";
+    var i;
+    for (i = 0; i < count; i++) {   
+      currentPathName = currentPathName.replace("0", i);
+    }
+  }
+
+  addData(branchIndex, data) {
+    if (branchIndex == null || !Number.isInteger(branchIndex)) return console.log("Branch index have to be an integer");
+    if (data == null) return console.log("Invalid data");
+
+    if (!Array.isArray(data)) data = [data]; // Forcing incoming data to be an array;
+    let convertedData = data.map(d => formatInputVal(d, this.typecode));
+
+    const curBranchIndex = Object.keys(this.InnerTreeData)[0].replace("0", branchIndex);
+    if (this.InnerTreeData[curBranchIndex] != null) {
+      // if this branch has existing data, append
+      this.InnerTreeData[curBranchIndex] = this.InnerTreeData[curBranchIndex].concat(convertedData);
+    }
+    else this.InnerTreeData[curBranchIndex] = convertedData;
+  }
+}
+
 class Input {
-  constructor(name) {
-    this.name = name;
+  constructor(name, type) {
+    this.Name = name;
     this.Keys = [];
-    this.InnerTree = {};
+    // this.InnerTree = {};    
     this.Values = [];
+    this.Typecode = this.findTypeCodeWithName(type);
+    this.InnerTree = new DataTree(this.findTypeCodeWithName(type));
   }
 
   toObject() {
     return {
-      ParamName: this.name,
-      Keys: this.Keys,
-      InnerTree: this.InnerTree,
-      // Values: this.Values,
-      // Count: this.Values.length,
+      ParamName: "SWRM_IN:" + this.Typecode + ":" + this.Name,
+      Keys: Object.keys(this.InnerTree.InnerTreeData),
+      InnerTree: this.InnerTree.InnerTreeData,
+      Values: this.Values,
+      Count: this.Values.length,
       IsReadOnly: false
     }
   }
+
+  findTypeCodeWithName(typeName) {
+    const typeIndex = Object.values(typeDict).indexOf(typeName);
+    if (typeIndex > -1) return Object.keys(typeDict)[typeIndex];
+    else return null;
+  }
+
+  
 }
 
 class Output {
@@ -495,8 +416,121 @@ class Output {
     }
   }
 
+};
+
+function formatInputVal(inp, typecode) {
+  console.log("formatInputVal", inp, typecode);
+  // var tree = [];
+  var swarmObj = {};
+  // toSwarmTree
+  if (typecode == 106 || typecode == 301 || typecode == 302) { // Text
+    swarmObj.type = "System.String";
+    swarmObj.data = `\"` + inp.Text + `\"`;
+    // tree.push(swarmObj);
+  } else if (typecode == 105 || typecode == 201) { // Number and Slider
+    swarmObj.type = "System.Double";
+    swarmObj.data = inp.Value;
+    // tree.push(swarmObj);
+  } else if (typecode == 104) { // Integer
+    swarmObj.type = "System.Int32";
+    swarmObj.data = inp.Value;
+    // tree.push(swarmObj);
+  } else if (typecode == 101 || typecode == 202) { // Boolean or Boolean Toogle
+    swarmObj.type = "System.Boolean";
+    //console.log("in.State", in.State);
+    swarmObj.data = `\"` + inp.State + `\"`;
+    // tree.push(swarmObj);
+  } else if (typecode == 116) { // Time
+    swarmObj.type = "System.DateTime";
+    swarmObj.data = `\"` + inp.SelectedDateTime + `\"`;
+    // tree.push(swarmObj);
+  } else if (typecode == 203) { // Value List
+    swarmObj.type = "System.String";
+    var selected = inp.Values.find(v => v.Key == inp.Key);
+    swarmObj.data = JSON.stringify(selected.Value);
+    // tree.push(swarmObj);
+  } else if (typecode == 102) { // Points
+    const currentGeo = {
+      type: "Rhino.Geometry.Point3d",
+      data: JSON.stringify(inp.Value),
+      attributes: {
+        "Name": null,
+        "LayerName": null,
+        "LayerIndex": -1,
+        "UserDictionary": {},
+        "DisplayColor": ""
+      }
+    };
+    // console.log("currentGeo", currentGeo);
+    // console.log("point element", element);
+    swarmObj = currentGeo;
+
+    // tree.push(currentGeo);
+  } else if (typecode == 108) { // Curves
+    const currentGeo = {
+      type: "Rhino.Geometry.NurbsCurve",
+      data: JSON.stringify(inp.Value),
+      attributes: {
+        "Name": null,
+        "LayerName": null,
+        "LayerIndex": -1,
+        "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
+        "DisplayColor": ""
+      }
+    };
+    //console.log("currentGeo", currentGeo);
+    swarmObj = currentGeo;
+
+    // tree.push(currentGeo);
+  } else if (typecode == 114) { // Brep
+    const currentGeo = {
+      type: "Rhino.Geometry.Brep",
+      data: JSON.stringify(inp.Value),
+      attributes: {
+        "Name": null,
+        "LayerName": null,
+        "LayerIndex": -1,
+        "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
+        "DisplayColor": ""
+      }
+    };
+    swarmObj = currentGeo;
+
+    // tree.push(currentGeo);
+  } else if (typecode == 115) { // Mesh
+    const currentGeo = {
+      type: "Rhino.Geometry.Mesh",
+      data: JSON.stringify(inp.Value),
+      attributes: {
+        "Name": null,
+        "LayerName": null,
+        "LayerIndex": -1,
+        "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
+        "DisplayColor": ""
+      }
+    };
+    swarmObj = currentGeo;
+
+    // tree.push(currentGeo);
+  } else if (typecode == 306) {
+    console.log("TODO not sure how swarm object ", inp);
+    swarmObj.type = "System.Object";
+    swarmObj.data = JSON.stringify(inp.Lines);
+    // tree.push(swarmObj);
+  } else if (input.hasOwnProperty('ReferencedGeometry')) {
+    if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
+      input.ReferencedGeometry.forEach(element => {
+        // tree.push(element);
+      });
+    }
+  } else {
+    console.log("TODO new type ? ", input.type);
+  }
+
+  return swarmObj;
 }
 
 
 
-module.exports = SwarmApp;
+// module.exports = SwarmApp;
+module.exports = {SwarmApp, Input, DataTree};
