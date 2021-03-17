@@ -350,7 +350,7 @@ class Output {
 };
 
 
-function formatInputValNew(inp, typecode) {
+const formatInputValNew = (inp, typecode) => {
   // var tree = [];
   var swarmObj = {};
   // toSwarmTree
