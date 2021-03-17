@@ -25,8 +25,9 @@ const typeDict = {
 };
 
 
-// cost swarmUrl = "https://dev-swarm.herokuapp.com/api/external";
+// const swarmUrl = "https://dev-swarm.herokuapp.com/api/external";
 const swarmUrl = "https://swarm.thorntontomasetti.com/api/external";
+// const swarmUrl = "http://localhost:1111/api/external";
 
 class SwarmApp {
   constructor(units, tolerance) {
@@ -35,8 +36,10 @@ class SwarmApp {
     this.appToken = null;
     this.localPort = null;
     this.userId = null;
+    this.ssoId = null;
     this.logging = false;
     this.inputs = [];
+    this.saveCompute = false;
   }
 
   // Method
@@ -66,7 +69,9 @@ class SwarmApp {
         token: this.appToken,
         // inputs: this.inputValues.map(v => v.toObject()),
         inputs: this.inputs.map(inp => inp.toObject()),
-        userId: this.userId
+        userId: this.userId,
+        ssoId: this.ssoId,
+        saveThisCompute : this.saveCompute
       }
 
       let postRoute = swarmUrl + '/compute';
@@ -350,7 +355,7 @@ class Output {
 };
 
 
-const formatInputValNew = (inp, typecode) => {
+function formatInputValNew(inp, typecode) {
   // var tree = [];
   var swarmObj = {};
   // toSwarmTree
