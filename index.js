@@ -115,7 +115,8 @@ class SwarmApp {
       const reqBody = {
         token: this.appToken,
         inputs: this.inputValues.map(v => v.toObject()),
-        userId: this.userId
+        userId: this.userId,
+        ssoId: this.ssoId
       }
       let postRoute = swarmUrl + '/request-long-compute';
       if (this.localPort != null) postRoute = 'http://localhost:' + this.localPort + '/api/external/request-long-compute';
@@ -128,8 +129,9 @@ class SwarmApp {
           return;
         }
 
+
         axios
-          .post(swarmUrl + '/get-compute-results', { _id: computeId, token: reqBody.token })
+          .post(swarmUrl + '/get-compute-results', { ...reqBody, ...{_id: computeId}})//appending new compute id to req.body
           .then(async function (res) {
             await sleep(1000);
             // console.log("Retrieved s3 link", res.data);
@@ -146,8 +148,8 @@ class SwarmApp {
       // Check compute status
       function requestComputeStatus(computeId, callback) {
         axios.post(swarmUrl + '/check-compute-status', {
-          mongoId: computeId,
-          token: reqBody.token
+          ...reqBody,
+          ...{mongoId: computeId}
         }).then(async function (response) {
           // request successful
           if (response.data == "Compute Finished!") {
