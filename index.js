@@ -101,7 +101,8 @@ class SwarmApp {
         })
         .catch((error) => {
           console.error(error);
-          reject(`Error in callback ${error}`);
+          resolve(null);
+          // reject(`Error in callback ${error}`);
         })
     });
 
@@ -216,8 +217,9 @@ class SwarmApp {
           requestComputeStatus(res.data, retrieveComputeDataCallback);
         })
         .catch((error) => {
-          // console.error(error);
-          reject(`Error in callback ${error}`);
+          console.error(error);
+          resolve(null);
+          // reject(`Error in callback ${error}`);
         })
     });
   }  
