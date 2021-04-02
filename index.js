@@ -100,9 +100,18 @@ class SwarmApp {
           resolve(returnedResult);
         })
         .catch((error) => {
-          console.error(error);
-          resolve(null);
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
           // reject(`Error in callback ${error}`);
+          resolve(null);
         })
     });
 
@@ -142,8 +151,9 @@ class SwarmApp {
             else reject("Didn't return a signed s3 link");
           })
           .catch((error) => {
-            console.error(error);
-            reject(`Error in callback ${error}`);
+            console.log('Error', error.message);
+            // reject(`Error in callback ${error}`);
+            resolve(null);
           })
       };
 
@@ -168,7 +178,7 @@ class SwarmApp {
           // ajax error occurred
           // would be better to not retry on 404, 500 and other unrecoverable HTTP errors
           // retry, if any retries left
-          console.log("failed, retrying...", error);
+          console.log("failed, retrying...", error.message);
           requestComputeStatus(computeId, callback);
         });
       }
@@ -217,9 +227,18 @@ class SwarmApp {
           requestComputeStatus(res.data, retrieveComputeDataCallback);
         })
         .catch((error) => {
-          console.error(error);
-          resolve(null);
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
           // reject(`Error in callback ${error}`);
+          resolve(null);
         })
     });
   }  
@@ -253,7 +272,7 @@ class Input {
   findTypeCodeWithName(typeName) {
     const typeIndex = Object.values(typeDict).indexOf(typeName);
     if (typeIndex > -1) return Object.keys(typeDict)[typeIndex];
-    else return null;
+    else return "000";
   }
 
   addDataTree(branchIndex, data) {
@@ -458,14 +477,14 @@ function formatInputValNew(inp, typecode) {
     swarmObj.type = "System.Object";
     swarmObj.data = JSON.stringify(inp);
     // tree.push(swarmObj);
-  } else if (input.hasOwnProperty('ReferencedGeometry')) {
-    if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
-      input.ReferencedGeometry.forEach(element => {
+  } else if (inp.hasOwnProperty('ReferencedGeometry')) {
+    if (inp.ReferencedGeometry != undefined && inp.ReferencedGeometry.length > 0) {
+      inp.ReferencedGeometry.forEach(element => {
         // tree.push(element);
       });
     }
   } else {
-    console.log("TODO new type ? ", input.type);
+    console.log("TODO new type ? ", inp.type);
   }
 
   return swarmObj;
