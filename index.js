@@ -330,11 +330,12 @@ class Output {
         return valueArray.length === 0 ? null : JSON.parse(valueArray.data);
       } else if (typecode == 301 || typecode == 302) // multiline panel
       {
-        var concat = valueArray.map(val => {
-          return JSON.parse(val.data);
-        });
+        // var concat = valueArray.map(val => {
+        //   return JSON.parse(val.data);
+        // });
 
-        return concat.join(",");
+        // return concat.join(",");
+        return valueArray.data;
       } else if (typecode == 104 || typecode == 105 || typecode == 201) // integer and Number || Slider
       {
         return valueArray.length === 0 ? null : JSON.parse(valueArray.data);
@@ -382,6 +383,11 @@ class Output {
 function formatInputValNew(inp, typecode) {
   // var tree = [];
   var swarmObj = {};
+  var customAttributes = null
+
+  if (inp.hasOwnProperty('customAttributes')) customAttributes = inp.customAttributes
+  if (inp.hasOwnProperty('value')) inp = inp.value
+  
   // toSwarmTree
   if (typecode == 106 || typecode == 301 || typecode == 302) { // Text
     swarmObj.type = "System.String";
@@ -434,11 +440,10 @@ function formatInputValNew(inp, typecode) {
         "Name": null,
         "LayerName": null,
         "LayerIndex": -1,
-        "UserDictionary": (inp) ? inp : {},
+        "UserDictionary": (customAttributes) ? customAttributes : {},
         "DisplayColor": ""
       }
     };
-    //console.log("currentGeo", currentGeo);
     swarmObj = currentGeo;
 
     // tree.push(currentGeo);
@@ -450,7 +455,7 @@ function formatInputValNew(inp, typecode) {
         "Name": null,
         "LayerName": null,
         "LayerIndex": -1,
-        "UserDictionary": (inp) ? inp : {},
+        "UserDictionary": (customAttributes) ? customAttributes : {},
         "DisplayColor": ""
       }
     };
@@ -465,7 +470,7 @@ function formatInputValNew(inp, typecode) {
         "Name": null,
         "LayerName": null,
         "LayerIndex": -1,
-        "UserDictionary": (inp) ? inp : {},
+        "UserDictionary": (customAttributes) ? customAttributes : {},
         "DisplayColor": ""
       }
     };
