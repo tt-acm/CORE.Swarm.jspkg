@@ -24,8 +24,10 @@ const typeDict = {
   302: "MultilinePanel"
 };
 
-// cost swarmUrl = "https://dev-swarm.herokuapp.com/api/external";
+
+// const swarmUrl = "https://dev-swarm.herokuapp.com/api/external";
 const swarmUrl = "https://swarm.thorntontomasetti.com/api/external";
+// const swarmUrl = "http://localhost:1111/api/external";
 
 class SwarmApp {
   constructor(units, tolerance) {
@@ -34,7 +36,10 @@ class SwarmApp {
     this.appToken = null;
     this.localPort = null;
     this.userId = null;
+    this.ssoId = null;
     this.logging = false;
+    this.inputs = [];
+    this.saveCompute = false;
   }
 
   // Method
@@ -62,41 +67,51 @@ class SwarmApp {
       const startTime = new Date();
       const reqBody = {
         token: this.appToken,
-        inputs: this.inputValues.map(v => v.toObject()),
-        userId: this.userId
+        // inputs: this.inputValues.map(v => v.toObject()),
+        inputs: this.inputs.map(inp => inp.toObject()),
+        userId: this.userId,
+        ssoId: this.ssoId,
+        saveThisCompute : this.saveCompute
       }
+
       let postRoute = swarmUrl + '/compute';
       if (this.localPort != null) postRoute = 'http://localhost:' + this.localPort + '/api/external/compute';
 
       axios
         .post(postRoute, reqBody)
         .then((res) => {
-          //console.log("res.data.values.InnerTree", res.data.values[0].InnerTree);
           const returnedResult = {
-            spectaclesElements : res.data.supplemental,
-            outputList: []
+            spectaclesElements: res.data.supplemental,
+            outputs: []
           }
 
           if (res.data.values == null) return resolve(null);
 
           res.data.values.forEach(function (val) {
-            let currentOutput = new Output(val);
-            var valueArray = Object.values(val.InnerTree)[0];
-            if (valueArray != null) {
-              currentOutput.setOutputValue(valueArray)
-              returnedResult.outputList.push(currentOutput);
-            }            
+            let currentOutput = new Output();
+            currentOutput.populateOutput(val);
+            returnedResult.outputs.push(currentOutput);
           });
 
           var endTime = new Date();
           const seconds = (endTime.getTime() - startTime.getTime()) / 1000;
-          if (this.logging) console.log("SWARM COMPUTE FINISHED AFTER " + seconds+ " seconds");
+          if (this.logging) console.log("SWARM COMPUTE FINISHED AFTER " + seconds + " seconds");
 
           resolve(returnedResult);
         })
         .catch((error) => {
-          console.error(error);
-          reject(`Error in callback ${error}`);
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+          // reject(`Error in callback ${error}`);
+          resolve(null);
         })
     });
 
@@ -105,12 +120,14 @@ class SwarmApp {
   runLongCompute() {
     const startTime = new Date();
     const log = this.logging;
-    
+
     return new Promise((resolve, reject) => {
       const reqBody = {
         token: this.appToken,
-        inputs: this.inputValues.map(v => v.toObject()),
-        userId: this.userId
+        inputs: this.inputs.map(inp => inp.toObject()),
+        userId: this.userId,
+        ssoId: this.ssoId,
+        saveThisCompute : this.saveCompute
       }
       let postRoute = swarmUrl + '/request-long-compute';
       if (this.localPort != null) postRoute = 'http://localhost:' + this.localPort + '/api/external/request-long-compute';
@@ -119,84 +136,80 @@ class SwarmApp {
       var retrieveComputeDataCallback = (computeId, error) => {
         // consume data
         if (error) {
-            console.error(error);
-            return;
+          console.error(error);
+          return;
         }
-        // console.log("Retrieving compute from id: ",computeId);
 
-        // return new Promise((resolve, reject) => {});
 
         axios
-        .post(swarmUrl + '/get-compute-results', {_id: computeId, token: reqBody.token})
-        .then(async function(res) {
-          await sleep(1000);
-          // console.log("Retrieved s3 link", res.data);
+          .post(swarmUrl + '/get-compute-results', { ...reqBody, ...{_id: computeId}})//appending new compute id to req.body
+          .then(async function (res) {
+            await sleep(1000);
+            // console.log("Retrieved s3 link", res.data);
 
-          if (res.data) retrieveFullComputeFromS3(res.data);
-          else reject("Didn't return a signed s3 link");
-        })
-        .catch((error) => {
-          console.error(error);
-          reject(`Error in callback ${error}`);
-        })
+            if (res.data) retrieveFullComputeFromS3(res.data);
+            else reject("Didn't return a signed s3 link");
+          })
+          .catch((error) => {
+            console.log('Error', error.message);
+            // reject(`Error in callback ${error}`);
+            resolve(null);
+          })
       };
 
       // Check compute status
       function requestComputeStatus(computeId, callback) {
         axios.post(swarmUrl + '/check-compute-status', {
-          mongoId:computeId,
-          token: reqBody.token
-        }).then(async function(response) {
-            // request successful
-            if(response.data == "Compute Finished!") {
-              // console.log("Compute outputs saved to S3!");
-              // server done, deliver data to script to consume
-              retrieveComputeDataCallback(computeId);
-            }
-            else {
-              await sleep(1000);
-              if (log) console.log("retrying...");
-              requestComputeStatus(computeId, callback);
-            }
-        }).catch(error => {
-            // ajax error occurred
-            // would be better to not retry on 404, 500 and other unrecoverable HTTP errors
-            // retry, if any retries left
-            console.log("failed, retrying...", error);
+          ...reqBody,
+          ...{mongoId: computeId}
+        }).then(async function (response) {
+          // request successful
+          if (response.data == "Compute Finished!") {
+            // console.log("Compute outputs saved to S3!");
+            // server done, deliver data to script to consume
+            retrieveComputeDataCallback(computeId);
+          }
+          else {
+            await sleep(1000);
+            if (log) console.log("retrying...");
             requestComputeStatus(computeId, callback);
+          }
+        }).catch(error => {
+          // ajax error occurred
+          // would be better to not retry on 404, 500 and other unrecoverable HTTP errors
+          // retry, if any retries left
+          console.log("failed, retrying...", error.message);
+          requestComputeStatus(computeId, callback);
         });
       }
 
       function retrieveFullComputeFromS3(url, callback) {
         axios.get(url).then(res => {
-          // console.log("Retrieved response from s3");
+          // console.log("Retrieved response from s3", res.data.values);
 
           const returnedResult = {
-            spectaclesElements : res.data.supplemental,
-            outputList: []
+            spectaclesElements: res.data.supplemental,
+            outputs: []
           }
 
           if (res.data.values == null) return resolve(null);
 
           res.data.values.forEach(function (val) {
-            let currentOutput = new Output(val);
-            var valueArray = Object.values(val.InnerTree)[0];
-            if (valueArray != null) {
-              currentOutput.setOutputValue(valueArray)
-              returnedResult.outputList.push(currentOutput);
-            }            
+            let currentOutput = new Output();
+            currentOutput.populateOutput(val);
+            returnedResult.outputs.push(currentOutput);
           });
 
           var endTime = new Date();
           const seconds = (endTime.getTime() - startTime.getTime()) / 1000;
-          if (log) console.log("SWARM COMPUTE FINISHED AFTER " + seconds+ " seconds");
+          if (log) console.log("SWARM COMPUTE FINISHED AFTER " + seconds + " seconds");
           resolve(returnedResult);
 
         }).catch(error => {
-            // ajax error occurred
-            // would be better to not retry on 404, 500 and other unrecoverable HTTP errors
-            // retry, if any retries left
-            console.log(error);
+          // ajax error occurred
+          // would be better to not retry on 404, 500 and other unrecoverable HTTP errors
+          // retry, if any retries left
+          console.log(error);
         });
       }
 
@@ -214,233 +227,275 @@ class SwarmApp {
           requestComputeStatus(res.data, retrieveComputeDataCallback);
         })
         .catch((error) => {
-          // console.error(error);
-          reject(`Error in callback ${error}`);
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+          // reject(`Error in callback ${error}`);
+          resolve(null);
         })
     });
+  }  
+}
+
+class DataTree {
+  constructor(type) {
+    this.InnerTreeData = {"{ 0; }":[]};
+    this.Typecode = type;
+  }  
+}
+
+class Input {
+  constructor(name, type) {
+    this.Name = name;
+    this.Keys = [];
+    this.Typecode = this.findTypeCodeWithName(type);
+    this.InnerTree = new DataTree(this.findTypeCodeWithName(type));
+  }
+
+  toObject() {
+    return {
+      ParamName: "SWRM_IN:" + this.Typecode + ":" + this.Name,
+      Keys: Object.keys(this.InnerTree.InnerTreeData),
+      InnerTree: this.InnerTree.InnerTreeData,
+      Count: this.Keys.length,
+      IsReadOnly: false
+    }
   }
 
   findTypeCodeWithName(typeName) {
     const typeIndex = Object.values(typeDict).indexOf(typeName);
     if (typeIndex > -1) return Object.keys(typeDict)[typeIndex];
-    else return null;
+    else return "000";
   }
 
-  addInput(input) {
-    // const newInput = {
-    //   Keys: ["{ 0; }"],
-    //   InnerTree: {}
-    // };
-    const typecode = this.findTypeCodeWithName(input.type);
-    const paramName = "SWRM_IN:" + typecode + ":" + input.name;
-    let newInput = new Input(paramName);
+  addDataTree(branchIndex, data) {
+    // console.log("ADD DATA TREE", branchIndex, data, this.Typecode);
+    if (branchIndex == null || !Number.isInteger(branchIndex)) return console.log("Branch index have to be an integer");
+    if (data == null) return console.log("Invalid data");
 
-    input.values.forEach(function (inp) {
-      var tree = [];
-      var swarmObj = {};
-      // toSwarmTree
-      if (typecode == 106 || typecode == 301 || typecode == 302) { // Text
-        swarmObj.type = "System.String";
-        swarmObj.data = `\"` + inp.Text + `\"`;
-        tree.push(swarmObj);
-      } else if (typecode == 105 || typecode == 201) { // Number and Slider
-        swarmObj.type = "System.Double";
-        swarmObj.data = inp.Value;
-        tree.push(swarmObj);
-      } else if (typecode == 104) { // Integer
-        swarmObj.type = "System.Int32";
-        swarmObj.data = inp.Value;
-        tree.push(swarmObj);
-      } else if (typecode == 101 || typecode == 202) { // Boolean or Boolean Toogle
-        swarmObj.type = "System.Boolean";
-        //console.log("in.State", in.State);
-        swarmObj.data = `\"` + inp.State + `\"`;
-        tree.push(swarmObj);
-      } else if (typecode == 116) { // Time
-        swarmObj.type = "System.DateTime";
-        swarmObj.data = `\"` + inp.SelectedDateTime + `\"`;
-        tree.push(swarmObj);
-      } else if (typecode == 203) { // Value List
-        swarmObj.type = "System.String";
-        var selected = inp.Values.find(v => v.Key == inp.Key);
-        swarmObj.data = JSON.stringify(selected.Value);
-        tree.push(swarmObj);
-      } else if (typecode == 102) { // Points
-        const currentGeo = {
-          type: "Rhino.Geometry.Point3d",
-          data: JSON.stringify(inp.Value),
-          attributes: {
-            "Name": null,
-            "LayerName": null,
-            "LayerIndex": -1,
-            "UserDictionary": {},
-            "DisplayColor": ""
-          }
-        };
-        // console.log("currentGeo", currentGeo);
-        // console.log("point element", element);
+    if (!Array.isArray(data)) data = [data]; // Forcing incoming data to be an array;
+    let convertedData = data.map(d => formatInputValNew(d, this.Typecode));
 
-        tree.push(currentGeo);
-      } else if (typecode == 108) { // Curves
-        const currentGeo = {
-          type: "Rhino.Geometry.NurbsCurve",
-          data: JSON.stringify(inp.Value),
-          attributes: {
-            "Name": null,
-            "LayerName": null,
-            "LayerIndex": -1,
-            "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
-            "DisplayColor": ""
-          }
-        };
-        //console.log("currentGeo", currentGeo);
+    const curBranchIndex = Object.keys(this.InnerTree.InnerTreeData)[0].replace("0", branchIndex);
 
-        tree.push(currentGeo);
-      } else if (typecode == 114) { // Brep
-        const currentGeo = {
-          type: "Rhino.Geometry.Brep",
-          data: JSON.stringify(inp.Value),
-          attributes: {
-            "Name": null,
-            "LayerName": null,
-            "LayerIndex": -1,
-            "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
-            "DisplayColor": ""
-          }
-        };
-
-        tree.push(currentGeo);
-      } else if (typecode == 115) { // Mesh
-        const currentGeo = {
-          type: "Rhino.Geometry.Mesh",
-          data: JSON.stringify(inp.Value),
-          attributes: {
-            "Name": null,
-            "LayerName": null,
-            "LayerIndex": -1,
-            "UserDictionary": (inp.customAttributes) ? inp.customAttributes : {},
-            "DisplayColor": ""
-          }
-        };
-
-        tree.push(currentGeo);
-      } else if (typecode == 306) {
-        console.log("TODO not sure how swarm object ", inp);
-        swarmObj.type = "System.Object";
-        swarmObj.data = JSON.stringify(inp.Lines);
-        tree.push(swarmObj);
-      } else if (input.hasOwnProperty('ReferencedGeometry')) {
-        if (input.ReferencedGeometry != undefined && input.ReferencedGeometry.length > 0) {
-          input.ReferencedGeometry.forEach(element => {
-            tree.push(element);
-          });
-        }
-      } else {
-        console.log("TODO new type ? ", input.type);
-      }
-
-      // tree.attributes = {
-      //   "Name": null,
-      //   "LayerName": null,
-      //   "LayerIndex": -1,
-      //   "UserDictionary": {},
-      //   "DisplayColor": ""
-      // }
-
-      //console.log("tree", tree);
-
-      newInput.InnerTree["{ 0; }"] = tree;
-
-      newInput.Keys = ["{ 0; }"];
-      newInput.Values = tree;
-    });
-
-    this.inputValues.push(newInput);
-  }
-}
-
-class Input {
-  constructor(name) {
-    this.name = name;
-    this.Keys = ["{ 0; }"];
-    this.InnerTree = {};
-    this.Values = null;
-  }
-
-  toObject() {
-    return {
-      ParamName: this.name,
-      Keys: this.Keys,
-      InnerTree: this.InnerTree,
-      Values: this.Values,
-      Count: this.Values.length,
-      IsReadOnly: false
+    if (this.InnerTree.InnerTreeData[curBranchIndex] != null) {
+      // if this branch has existing data, append
+      this.InnerTree.InnerTreeData[curBranchIndex] = this.InnerTree.InnerTreeData[curBranchIndex].concat(convertedData);
     }
+    else this.InnerTree.InnerTreeData[curBranchIndex] = convertedData;
   }
+
+  addData(data) {
+    this.addDataTree(0, data);
+  }  
 }
 
 class Output {
-  constructor(output) {
-    this.name = output.ParamName;
-    this.branchIndex = Object.values(output.InnerTree)? Object.values(output.InnerTree)[0]: null;
-    if (this.branchIndex && output.InnerTree[this.branchIndex]) this.attribute = output.InnerTree[this.branchIndex].attributes;
-    this.outputValue = null
+  constructor() {
+    this.name = null;
+    this.branches = [];
+    this.attribute = {};
+    this.outputValue = {};
   }
 
-  setOutputValue(valueArray) {
-    // var valueArray = Object.values(swarmOutput.InnerTree)[0];
-    if(valueArray === undefined || valueArray == null) return;
-    
+  populateOutput(returnedOutput) {
+    this.name = returnedOutput.ParamName;
+    this.branches = Object.keys(returnedOutput.InnerTree) ? Object.keys(returnedOutput.InnerTree) : [];
     if (this.name.split(':').length < 2) return;
 
-    let typecode = this.name.split(':')[1];
+    const typecode = this.name.split(':')[1];
 
-    // console.log("typecode", typecode);
 
-    //console.log("typecode", typecode);
-    if (typecode == 106) // text
-    {
-      //output.Text = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
-      this.outputValue = valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
-    } else if (typecode == 301 || typecode == 302) // multiline panel
-    {
-      var concat = valueArray.map(val => {
-        return JSON.parse(val.data);
-      });
+    this.branches.forEach(b => {
+      this.attribute[b] = returnedOutput.InnerTree[b].map(data => data.attributes);
+      this.outputValue[b] = returnedOutput.InnerTree[b].map(function (d) {
+        // loop throuhg each item in this branch
+        if (d == null || typeof d === 'undefined') return;
+        let curVal = getOutputValue(d, typecode);
+        return curVal;
+      })
+    })
 
-      this.outputValue = concat.join(",");
-    } else if (typecode == 104 || typecode == 105 || typecode == 201) // integer and Number || Slider
-    {
-      this.outputValue = valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
-      //output.Value = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data)
-    }
-    else if (typecode == 101 || typecode == 202) // boolean || boolean Togle
-    {
-      this.outputValue = valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
-      //output.State = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data == "true");
-    }
-    else if (typecode == 116) // time
-    {
-      this.outputValue = valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
-      //output.SelectedDateTime = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
-    }
-    else if (typecode == 305) // url
-    {
-      this.outputValue = valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
-      //output.Url = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
-      // } else if (output.hasOwnProperty('ReferencedGeometry')) {
-      //   this.outputValue = valueArray;
-      //output.ReferencedGeometry = swarmOutput.InnerTree['{ 0; }'];
-    }
-    else // everything else
-    {
-      this.outputValue = valueArray !== undefined ? valueArray : null ;
-    }
+    function getOutputValue(valueArray, typecode) {
+      if (typecode == 106) // text
+      {
+        //output.Text = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
+        return valueArray.length === 0 ? null : JSON.parse(valueArray.data);
+      } else if (typecode == 301 || typecode == 302) // multiline panel
+      {
+        // var concat = valueArray.map(val => {
+        //   return JSON.parse(val.data);
+        // });
 
-    this.attribute = valueArray !== undefined && valueArray.length != 0  ? valueArray[0].attributes : null ;
+        // return concat.join(",");
+        return valueArray.data;
+      } else if (typecode == 104 || typecode == 105 || typecode == 201) // integer and Number || Slider
+      {
+        return valueArray.length === 0 ? null : JSON.parse(valueArray.data);
+        // this.outputValue = valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
+        //output.Value = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data)
+      }
+      else if (typecode == 101 || typecode == 202) // boolean || boolean Togle
+      {
+        return valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
+        //output.State = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data == "true");
+      }
+      else if (typecode == 116) // time
+      {
+        return valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
+        //output.SelectedDateTime = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
+      }
+      else if (typecode == 305) // url
+      {
+        return valueArray.length === 0 ? null : JSON.parse(valueArray[0].data);
+        //output.Url = JSON.parse(swarmOutput.InnerTree['{ 0; }'][0].data);
+        // } else if (output.hasOwnProperty('ReferencedGeometry')) {
+        //   this.outputValue = valueArray;
+        //output.ReferencedGeometry = swarmOutput.InnerTree['{ 0; }'];
+      }
+      else // everything else
+      {
+        return valueArray !== undefined ? valueArray : null;
+      }
+
+      // this.attribute = valueArray !== undefined && valueArray.length != 0 ? valueArray[0].attributes : null;
+    }
   }
+
+  getDataTree(branchIndex) {
+    if (branchIndex == null || !Number.isInteger(branchIndex)) return console.log("Branch index have to be an integer");
+
+    if (branchIndex > this.branches.length - 1) return console.log("Cannot retrieve output data using specified branch index, index out of range.");
+
+    return this.outputValue[this.branches[branchIndex]];
+  }
+
+};
+
+
+function formatInputValNew(inp, typecode) {
+  // var tree = [];
+  var swarmObj = {};
+  var customAttributes = null
+
+  if (inp.hasOwnProperty('customAttributes')) customAttributes = inp.customAttributes
+  if (inp.hasOwnProperty('value')) inp = inp.value
+  
+  // toSwarmTree
+  if (typecode == 106 || typecode == 301 || typecode == 302) { // Text
+    swarmObj.type = "System.String";
+    swarmObj.data = `\"` + inp + `\"`;
+    // tree.push(swarmObj);
+  } else if (typecode == 105 || typecode == 201) { // Number and Slider
+    swarmObj.type = "System.Double";
+    swarmObj.data = inp;
+    // tree.push(swarmObj);
+  } else if (typecode == 104) { // Integer
+    swarmObj.type = "System.Int32";
+    swarmObj.data = inp;
+    // tree.push(swarmObj);
+  } else if (typecode == 101 || typecode == 202) { // Boolean or Boolean Toogle
+    swarmObj.type = "System.Boolean";
+    //console.log("in.State", in.State);
+    swarmObj.data = `\"` + inp + `\"`;
+    // tree.push(swarmObj);
+  } else if (typecode == 116) { // Time
+    swarmObj.type = "System.DateTime";
+    swarmObj.data = `\"` + inp + `\"`;
+    // tree.push(swarmObj);
+  } else if (typecode == 203) { // Value List
+    swarmObj.type = "System.String";
+    // var selected = inp.find(v => v.Key == inp.Key);
+    swarmObj.data = JSON.stringify(inp);
+    // tree.push(swarmObj);
+  } else if (typecode == 102) { // Points
+    const currentGeo = {
+      type: "Rhino.Geometry.Point3d",
+      data: JSON.stringify(inp),
+      attributes: {
+        "Name": null,
+        "LayerName": null,
+        "LayerIndex": -1,
+        "UserDictionary": {},
+        "DisplayColor": ""
+      }
+    };
+    // console.log("currentGeo", currentGeo);
+    // console.log("point element", element);
+    swarmObj = currentGeo;
+
+    // tree.push(currentGeo);
+  } else if (typecode == 108) { // Curves
+    const currentGeo = {
+      type: "Rhino.Geometry.NurbsCurve",
+      data: JSON.stringify(inp),
+      attributes: {
+        "Name": null,
+        "LayerName": null,
+        "LayerIndex": -1,
+        "UserDictionary": (customAttributes) ? customAttributes : {},
+        "DisplayColor": ""
+      }
+    };
+    swarmObj = currentGeo;
+
+    // tree.push(currentGeo);
+  } else if (typecode == 114) { // Brep
+    const currentGeo = {
+      type: "Rhino.Geometry.Brep",
+      data: JSON.stringify(inp),
+      attributes: {
+        "Name": null,
+        "LayerName": null,
+        "LayerIndex": -1,
+        "UserDictionary": (customAttributes) ? customAttributes : {},
+        "DisplayColor": ""
+      }
+    };
+    swarmObj = currentGeo;
+
+    // tree.push(currentGeo);
+  } else if (typecode == 115) { // Mesh
+    const currentGeo = {
+      type: "Rhino.Geometry.Mesh",
+      data: JSON.stringify(inp),
+      attributes: {
+        "Name": null,
+        "LayerName": null,
+        "LayerIndex": -1,
+        "UserDictionary": (customAttributes) ? customAttributes : {},
+        "DisplayColor": ""
+      }
+    };
+    swarmObj = currentGeo;
+
+    // tree.push(currentGeo);
+  } else if (typecode == 306) {
+    console.log("TODO not sure how swarm object ", inp);
+    swarmObj.type = "System.Object";
+    swarmObj.data = JSON.stringify(inp);
+    // tree.push(swarmObj);
+  } else if (inp.hasOwnProperty('ReferencedGeometry')) {
+    if (inp.ReferencedGeometry != undefined && inp.ReferencedGeometry.length > 0) {
+      inp.ReferencedGeometry.forEach(element => {
+        // tree.push(element);
+      });
+    }
+  } else {
+    console.log("TODO new type ? ", inp.type);
+  }
+
+  return swarmObj;
 }
 
 
 
-module.exports = SwarmApp;
+// module.exports = SwarmApp;
+module.exports = {SwarmApp, Input, DataTree};
