@@ -1,6 +1,6 @@
 {
   "name": "@ttcorestudio/swarm",
-  "version": "0.1.22",
+  "version": "0.1.24",
   "description": "Private NPM package for calling into the external Swarm Compute API",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/tt-acm/CORE.Swarm.jspkg#readme",
   "dependencies": {
-    "axios": "^0.20.0"
+    "axios": "^0.21.4"
+  },
+  "engines": {
+    "node": "14.18.0"
   }
 }
