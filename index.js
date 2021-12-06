@@ -360,6 +360,10 @@ class Output {
         //   this.outputValue = valueArray;
         //output.ReferencedGeometry = swarmOutput.InnerTree['{ 0; }'];
       }
+      else if (typecode == 306) // file
+      {
+        return valueArray !== undefined ?  JSON.parse(valueArray.data) : null;
+      }
       else // everything else
       {
         return valueArray !== undefined ? valueArray : null;
