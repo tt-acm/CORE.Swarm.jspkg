@@ -21,7 +21,9 @@ const typeDict = {
   202: "Boolean Toggle",
   203: "Value List",
   301: "Panel",
-  302: "MultilinePanel"
+  302: "MultilinePanel",
+  305: "Web Url",
+  306: "Files"
 };
 
 
@@ -359,6 +361,10 @@ class Output {
         // } else if (output.hasOwnProperty('ReferencedGeometry')) {
         //   this.outputValue = valueArray;
         //output.ReferencedGeometry = swarmOutput.InnerTree['{ 0; }'];
+      }
+      else if (typecode == 306) // file
+      {
+        return valueArray !== undefined ?  JSON.parse(valueArray.data) : null;
       }
       else // everything else
       {
