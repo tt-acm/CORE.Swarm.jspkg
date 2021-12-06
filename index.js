@@ -21,7 +21,9 @@ const typeDict = {
   202: "Boolean Toggle",
   203: "Value List",
   301: "Panel",
-  302: "MultilinePanel"
+  302: "MultilinePanel",
+  305: "Web Url",
+  306: "Files"
 };
 
 
